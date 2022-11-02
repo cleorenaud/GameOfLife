@@ -45,6 +45,21 @@ main:
 
 	; BEGIN:wait
     wait:
+		sll t0, 1, 19 ; 0x80000  ;2^19 + 2^19/SPEED
+		stw t1, 1
+		stw t2, SPEED
+
+		loop:
+		beq t2, 1, wait_loop
+		sub t0, t0, 0xCCCD
+		sub t2, t2, t1
+
+
+		wait_loop:
+		sub t0, t0, t1
+		beq t0, 0, wait_exit
+		br wait_loop
+		wait_exit:
         ret
     ; END:wait
 
