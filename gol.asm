@@ -31,12 +31,15 @@
 main:
     ; BEGIN:clear_leds
     clear_leds:
-        ldw t1, LEDS (zero)
+        stw zero, LEDS (zero)
+		stw zero, LEDS+4 (zero)
+		stw zero, LEDS+8 (zero)
         ret
     ; END:clear_leds
 
 	; BEGIN:set_pixel
     set_pixel:
+
         ret
     ; END:set_pixel
 
