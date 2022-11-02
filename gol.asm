@@ -29,7 +29,21 @@
     .equ RUNNING, 0x01
 
 main:
-    ;; TODO
+    ; BEGIN:clear_leds
+    clear_leds:
+        ldw t1, LEDS (zero)
+        ret
+    ; END:clear_leds
+
+	; BEGIN:set_pixel
+    set_pixel:
+        ret
+    ; END:set_pixel
+
+	; BEGIN:wait
+    wait:
+        ret
+    ; END:wait
 
 font_data:
     .word 0xFC ; 0
