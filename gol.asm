@@ -37,10 +37,62 @@ main:
         ret
     ; END:clear_leds
 
+	
+	
+	
 	; BEGIN:set_pixel
     set_pixel:
 
-        ret
+		addi t0, zero, 1 ; we put our temporary register to 1
+		
+		cmpgei t1, a0, 4
+		beq zero, t1, set_pixel_leds0 ; if x < 4 then x is in LED[0]
+		cmpgei t1, a0, 8
+		beq zero, t1, set_pixel_leds1 ; if x < 8 (and x > 3) then x is in LED[1]
+		cmpgei t1, a0, 12
+		beq zero, t1, set_pixel_leds2 ; if x < 12 (and x > 7) then x is in LED[3] 
+
+		ret ; if x is bigger than 11 then we do nothing
+
+		set_pixel_leds0: ; if the pixel is in LED[0]
+			; in the 3 following line we multiply x % 4 by 8
+			add t7, a0, a0
+			add t7, t7, t7
+			add t7, t7, t7
+
+			add t6, a1, t7 ; the number of the pixel we want to light
+			sll t0, t0, t6
+			stw t0, LEDS (zero)
+			ret
+
+		set_pixel_leds1: ; if the pixel is in LED[1]
+			addi t3, zero, 4
+			sub t2, a0, t3 ; t2 = x - 4
+
+			; in the 3 following line we multiply x % 4 by 8
+			add t7, t2, t2
+			add t7, t7, t7
+			add t7, t7, t7
+
+			add t6, a1, t7 ; the number of the pixel we want to light
+			sll t0, t0, t6
+			stw t0, LEDS+4 (zero)
+			ret
+
+		set_pixel_leds2: ; if the pixel is in LED[2]
+			addi t3, zero, 8
+			sub t2, a0, t3 ; t2 = x - 8
+
+			; in the 3 following line we multiply x % 4 by 8
+			add t7, t2, t2
+			add t7, t7, t7
+			add t7, t7, t7
+
+			add t6, a1, t7 ; the number of the pixel we want to light
+			sll t0, t0, t6
+			stw t0, LEDS+8 (zero)
+			ret
+	
     ; END:set_pixel
 
 	; BEGIN:wait
