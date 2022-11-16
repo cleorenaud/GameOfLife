@@ -176,6 +176,45 @@ main:
 
 	; END:get_gsa
 
+    ; BEGIN:draw_gsa
+	draw_gsa:
+		call clear_leds
+		add t0, zero, zero
+		add t1, zero, zero ;used to store value of x at given index
+		addi t3, zero, 12 ;max value of x
+		add a0, zero, zero
+		add a1, zero, zero
+		addi t5, zero, 8
+
+
+		y_loop:
+			add t2, zero, zero ;used to iterate over x's
+			add a0, a1, t0 ;as a1 was the new a0 for a moment
+			call get_gsa
+			add t4, v0, zero
+			
+			x_loop:
+				addi t0, zero, 1 ; mask used to determine value at position x
+				bgeu t2, t3, y_loop
+
+				;mask
+				and t1, t0, t4
+				srli t4, t4, 1 ;we shift t4 i.e. vo by one
+			
+
+
+				bne t1, t0, check_if_finished
+
+				;setting_pixels
+				add a1, a0, zero ;we exchange x and y for set_pixel
+				add a0, t2, zero ;we add value of x to a0
+				call set_pixel
+
+			check_if_finished:
+				bltu a1, t5, x_loop ;we continue while a1 < 8
+			ret
+	; END:draw_gsa
+
 font_data:
     .word 0xFC ; 0
     .word 0x60 ; 1
