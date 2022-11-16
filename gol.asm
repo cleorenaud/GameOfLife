@@ -97,22 +97,16 @@ main:
 
 	; BEGIN:wait
     wait:
-		sll t0, 1, 19 ; 0x80000  ;2^19 + 2^19/SPEED
-		stw t1, 1
-		stw t2, SPEED
-
-		loop:
-		beq t2, 1, wait_loop
-		sub t0, t0, 0xCCCD
-		sub t2, t2, t1
-
+		addi t0, zero, 1 ; we put our temporary register to 1
+		slli t1, t0, 19; 0x80000  ;2^19
+		ldw t2, SPEED(zero)
 
 		wait_loop:
-		sub t0, t0, t1
-		beq t0, 0, wait_exit
-		br wait_loop
+			sub t1, t1, t2 ;substract speed
+			beq t1, t0, wait_exit
+			br wait_loop
 		wait_exit:
-        ret
+        	ret
     ; END:wait
 
 font_data:
