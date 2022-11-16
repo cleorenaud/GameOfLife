@@ -132,11 +132,11 @@ main:
 		beq t0, zero, get_gsa_0 ; if the current gsa is 0 we do set_gsa_0, else we do set_gsa_1
 		
 		set_gsa_1:
-			stw a0, GSA1 (a1)
+			stw a0, GSA1 (a1) ; we store the y line in its position in the current gsa
 			ret
 	
 		set_gsa_0:
-			stw a0, GSA0 (a1)
+			stw a0, GSA0 (a1) ; we store the y line in its position in the current gsa
 			ret
 
 	; END set_gsa
