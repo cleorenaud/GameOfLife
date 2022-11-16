@@ -110,71 +110,76 @@ main:
     ; END:wait
 
 
-    ; BEGIN:get_gsa
+    	; BEGIN:get_gsa
 	get_gsa:
-		add t0, zero, zero ; t0 = 0, t0 will we what we return
+		addi t1, zero, 1 ; the mask
+		addi t4, zero, 2 ; a constant
+		addi t5, zero, 3 ; a constant
+		addi t6, zero, 0 ; counter from 0 to 2 (for the leds)
+
+		get_gsa_led0:
+			ldw t2, LEDS (zero)
+			br get_gsa_led
 	
+		get_gsa_led1:
+			or v0, v0, t0 ; we add the 4 bits for LED[0]
+			ldw t2, LEDS+4 (zero)
+			br get_gsa_led
+		
+		get_gsa_led2:
+			slli t0, t0, 4
+			or v0, v0, t0 ; we add the 4 bits for LED[1]
+			ldw t2, LEDS+8 (zero)
+			br get_gsa_led
+
+		get_gsa_end:
+			slli t0, t0, 8
+			or v0, v0, t0 ; we add the 4 bits for LED[2]
+
+			ret
+		
+		get_gsa_led:
+			add t0, zero, zero ; to stock intermediate result
+			add t7, zero, zero ; counter of bits
+
+			; for the first bit
+			srl t2, t2, a0
+			and t0, t1, t2
+			addi t7, t7, 1 ; we increment the counter of bits
+
+			; for the second bit
+			srli t2, t2, 8
+			and t3, t1, t2
+			sll t3, t3, t7
+			or t0, t0, t3
+			addi t7, t7, 1 ; we increment the counter of bits
+
+			; for the third bit
+			srli t2, t2, 8
+			and t3, t1, t2
+			sll t3, t3, t7
+			or t0, t0, t3
+			addi t7, t7, 1 ; we increment the counter of bits
+
+			; for the fourth bit
+			srli t2, t2, 8
+			and t3, t1, t2
+			sll t3, t3, t7
+			or t0, t0, t3
 			
-		add t5, zero, a0 ; t5 = a0, the bit of the led we want
-		addi t7, zero, 4 ; t7 = 4, t7 will be a counter 
-	
-		get_gsa_loop0:
-			ldw t6, LEDS (zero) ; we store the value of LED[0] in t6
-		
-			addi t4, zero, 1 ; t4 = 1
-			sub t7, t7, t4 ; we decrement the counter by 1
-			sll t4, t4, t5 ; we create a mask to extract the th value 
+			addi t6, t6, 1 ; we increment our counter by 1
 
-			and t4, t4, t6 ; we apply the mask
-			and t0, t0, t4 ; we add the i-th value
-
-			addi t5, t5, N_GSA_LINES ; t5 = t5 + 8, we increment the row by 1	
-
-			bne t7, zero, get_gsa_loop0 ; if counter != 0 then we re-do the loop
-
-		add t5, zero, a0 ; t5 = a0, the bit of the led we want
-		addi t7, zero, 4 ; t7 = 4, t7 will be a counter
-
-		get_gsa_loop1:
-			ldw t6, LEDS+4 (zero) ; we store the value of LED[1] in t6
-		
-			addi t4, zero, 1 ; t4 = 1
-			sub t7, t7, t4 ; we decrement the counter by 1
-			sll t4, t4, a0 ; we create a mask to extract the th value 
-
-			and t4, t4, t6 ; we apply the mask
-			slli t4, t4, 4 ; as we are in LED[1]
-			and t0, t0, t4 ; we add the i-th value
-
-			addi t5, t5, N_GSA_LINES ; t5 = t5 + 8, we increment the row by 1	
-
-			bne t7, zero, get_gsa_loop1 ; if counter != 0 then we re-do the loop
-
-		add t5, zero, a0 ; t5 = a0, the bit of the led we want
-		addi t7, zero, 4 ; t7 = 4, t7 will be a counter
-
-		get_gsa_loop2:
-			ldw t6, LEDS+8 (zero) ; we store the value of LED[2] in t6
-		
-			addi t4, zero, 1 ; t4 = 1
-			sub t7, t7, t4 ; we decrement the counter by 1
-			sll t4, t4, a0 ; we create a mask to extract the th value 
-
-			and t4, t4, t6 ; we apply the mask
-			slli t4, t4, 8 ; as we are in LEDS[2] 
-			and t0, t0, t4 ; we add the i-th value
-
-			addi t5, t5, N_GSA_LINES ; t5 = t5 + 8, we increment the row by 1	
-
-			bne t7, zero, get_gsa_loop2 ; if counter != 0 then we re-do the loop
-		
-
-		add v0, t0, zero ; we add the line at location y in the GSA in a register	
-		ret
-
-
+			beq t6, t1, get_gsa_led1 ; if counter = 1 we go to LED[1]
+			beq t6, t4, get_gsa_led2 ; if counter = 2 we go to LED[2]
+			beq t6, t5, get_gsa_end ; if counter = 3 we end the process
 
 	; END:get_gsa
+
+
+	; BEGIN set_gsa
+	set_gsa:
+		ret
+	; END set_gsa
 
     ; BEGIN:draw_gsa
 	draw_gsa:
