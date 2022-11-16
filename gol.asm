@@ -126,9 +126,19 @@ main:
 	; END:get_gsa
 
 
-	; BEGIN set_gsa
+		; BEGIN set_gsa
 	set_gsa:
-		ret
+		ldw t0, GSA_ID (zero) ; We extract the value determining which is the current gsa 
+		beq t0, zero, get_gsa_0 ; if the current gsa is 0 we do set_gsa_0, else we do set_gsa_1
+		
+		set_gsa_1:
+			stw a0, GSA1 (a1)
+			ret
+	
+		set_gsa_0:
+			stw a0, GSA0 (a1)
+			ret
+
 	; END set_gsa
 
     ; BEGIN:draw_gsa
