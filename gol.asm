@@ -58,6 +58,14 @@ main:
 	call draw_gsa
 	;We should get the same leds lighting up as in the 3.3.1!!!!
 
+
+	;tests for random
+	;call clear_leds
+	;call random_gsa
+	;call draw_gsa
+	;call wait
+
+
 	
     ; BEGIN:clear_leds
     clear_leds:
@@ -252,6 +260,33 @@ main:
 
 			
 	; END:draw_gsa
+
+
+	; BEGIN:random_gsa
+	random_gsa:
+			add a0, zero, zero
+			add a1, zero, zero
+			addi s0, zero, 1 ;used to mask
+			add s2, zero, zero ;used to iterate over x
+			addi s3, zero, 12 ;max value of x
+			addi s5, zero, 8
+			
+			random_y_loop:
+				random_x_loop:
+					ldw s1, RANDOM_NUM (zero)
+					and s4, s0, s1
+					or a0, a0, s4
+					slli a0, a0, 1
+					addi s2, s2, 1
+					bltu s2, s3, random_x_loop
+				srli a0, a0, 1
+				call set_gsa
+				addi a1, a1, 1
+				bltu a1, s5, random_y_loop
+			ret ;same problem here, we ret to line addi a1, a1, 1 just above, how to store the value of ra???????
+	; END:random_gsa
+
+	
 
 
 
