@@ -29,6 +29,36 @@
     .equ RUNNING, 0x01
 
 main:
+	call clear_leds
+	addi a0, zero, 3
+	addi a1, zero, 0
+	call set_gsa
+	addi a0, zero, 67
+	addi a1, zero, 1
+	call set_gsa
+	addi a0, zero, 128
+	addi a1, zero, 2
+	call set_gsa
+	addi a0, zero, 224
+	addi a1, zero, 3
+	call set_gsa
+	addi a0, zero, 0
+	addi a1, zero, 4
+	call set_gsa
+	addi a0, zero, 2
+	addi a1, zero, 5
+	call set_gsa
+	addi a0, zero, 4
+	addi a1, zero, 6
+	call set_gsa
+	addi a0, zero, 7
+	addi a1, zero, 7
+	call set_gsa
+
+	call draw_gsa
+	;We should get the same leds lighting up as in the 3.3.1!!!!
+
+	
     ; BEGIN:clear_leds
     clear_leds:
         stw zero, LEDS (zero)
@@ -62,7 +92,7 @@ main:
 
 			add t6, a1, t7 ; the number of the pixel we want to light
 			sll t0, t0, t6
-			stw t0, LEDS (zero)
+			stw t0, LEDS (zero) ;maybe you have to do: stw register containg '1', LEDS(position of the led to light up)
 			ret
 
 		set_pixel_leds1: ; if the pixel is in LED[1]
@@ -110,17 +140,32 @@ main:
     ; END:wait
 
 
-    	; BEGIN:get_gsa
+	; BEGIN:get_gsa
 	get_gsa:
 		ldw t0, GSA_ID (zero) ; We extract the value determining which is the current gsa 
+		;we will loop over a0 to be able to add +0, +4, +8... to get the correct index of the GSA
+		add t1, a0, zero
+		add t2, zero, zero
+		add t3, zero, zero
+		add t4, zero, zero
+		
+		a0_loop:
+			add t1, t1, t2
+			add t3, t3, t4
+			addi t4, zero, 1
+			addi t2, zero, 3 ;should it be +3 or +4 here????
+			bltu t3, a0, a0_loop
+
+
+		
 		beq t0, zero, get_gsa_0 ; if the current gsa is 0 we do get_gsa_0, else we do get_gsa_1
 
 		get_gsa_1:
-			ldw v0, GSA1 (a0) ; we load the y line of the current gsa in v0
+			ldw v0, GSA1 (t1) ; we load the y line of the current gsa in v0
 			ret
 
 		get_gsa_0:
-			ldw v0, GSA0 (a0) ; we load the y line of the current gsa in v0
+			ldw v0, GSA0 (t1) ; we load the y line of the current gsa in v0
 			ret
 		
 	; END:get_gsa
@@ -128,15 +173,28 @@ main:
 
 		; BEGIN set_gsa
 	set_gsa:
-		ldw t0, GSA_ID (zero) ; We extract the value determining which is the current gsa 
-		beq t0, zero, get_gsa_0 ; if the current gsa is 0 we do set_gsa_0, else we do set_gsa_1
+		ldw t0, GSA_ID (zero) ; We extract the value determining which is the current gsa
+		;we will loop over a1 to be able to add +0, +4, +8... to index the GSA correctly
+		add t1, a1, zero
+		add t2, zero, zero
+		add t3, zero, zero
+		add t4, zero, zero
+		
+		a1_loop:
+			add t1, t1, t2
+			add t3, t3, t4
+			addi t4, zero, 1
+			addi t2, zero, 3 ;should it be +3 or +4 here????
+			bltu t3, a1, a1_loop
+			
+		beq t0, zero, set_gsa_0 ; if the current gsa is 0 we do set_gsa_0, else we do set_gsa_1
 		
 		set_gsa_1:
-			stw a0, GSA1 (a1) ; we store the y line in its position in the current gsa
+			stw a0, GSA1 (t1) ; we store the y line in its position in the current gsa
 			ret
 	
 		set_gsa_0:
-			stw a0, GSA0 (a1) ; we store the y line in its position in the current gsa
+			stw a0, GSA0 (t1) ; we store the y line in its position in the current gsa
 			ret
 
 	; END set_gsa
@@ -144,41 +202,47 @@ main:
     ; BEGIN:draw_gsa
 	draw_gsa:
 		call clear_leds
-		add t0, zero, zero
-		add t1, zero, zero ;used to store value of x at given index
-		addi t3, zero, 12 ;max value of x
+		add s0, zero, zero
+		add s1, zero, zero ;used to store value of x at given index
+		addi s3, zero, 12 ;max value of x
 		add a0, zero, zero
 		add a1, zero, zero
-		addi t5, zero, 8
+		addi s5, zero, 7
 
 
 		y_loop:
-			add t2, zero, zero ;used to iterate over x's
-			add a0, a1, t0 ;as a1 was the new a0 for a moment
+			add s2, zero, zero ;used to iterate over x's
+			add a0, a0, s0
 			call get_gsa
-			add t4, v0, zero
+			add s4, v0, zero
 			
 			x_loop:
-				addi t0, zero, 1 ; mask used to determine value at position x
-				bgeu t2, t3, y_loop
+				addi s0, zero, 1 ; mask used to determine value at position x
+				addi s2, s2, 1
+				bgeu s2, s3, y_loop
 
 				;mask
-				and t1, t0, t4
-				srli t4, t4, 1 ;we shift t4 i.e. vo by one
+				and s1, s0, s4
+				srli s4, s4, 1 ;we shift s4 i.e. vo by one
 			
 
 
-				bne t1, t0, check_if_finished
+				bne s1, s0, check_if_finished
 
 				;setting_pixels
 				add a1, a0, zero ;we exchange x and y for set_pixel
-				add a0, t2, zero ;we add value of x to a0
+				add a0, s2, zero ;we add value of x to a0
 				call set_pixel
+				add a0, a1, zero ; we re-exchange x and y
+				add a1, zero, zero ;we exchange x and y for set_pixel
 
 			check_if_finished:
-				bltu a1, t5, x_loop ;we continue while a1 < 8
+				bltu a0, s5, x_loop ;we continue while a0 < 8
 			ret
 	; END:draw_gsa
+
+
+   
 
 font_data:
     .word 0xFC ; 0
