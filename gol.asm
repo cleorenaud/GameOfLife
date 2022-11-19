@@ -202,31 +202,24 @@ main:
     ; BEGIN:draw_gsa
 	draw_gsa:
 		call clear_leds
-		add s0, zero, zero
+		addi s0, zero, 1 ; mask used to determine value at position x
 		add s1, zero, zero ;used to store value of x at given index
 		addi s3, zero, 12 ;max value of x
 		add a0, zero, zero
 		add a1, zero, zero
-		addi s5, zero, 7
+		addi s5, zero, 8
 
 
 		y_loop:
 			add s2, zero, zero ;used to iterate over x's
-			add a0, a0, s0
+			
 			call get_gsa
 			add s4, v0, zero
 			
 			x_loop:
-				addi s0, zero, 1 ; mask used to determine value at position x
-				addi s2, s2, 1
-				bgeu s2, s3, y_loop
-
 				;mask
 				and s1, s0, s4
 				srli s4, s4, 1 ;we shift s4 i.e. vo by one
-			
-
-
 				bne s1, s0, check_if_finished
 
 				;setting_pixels
@@ -237,9 +230,20 @@ main:
 				add a1, zero, zero ;we exchange x and y for set_pixel
 
 			check_if_finished:
-				bltu a0, s5, x_loop ;we continue while a0 < 8
-			ret
+				addi s2, s2, 1
+				bltu s2, s3, x_loop
+
+				addi a0, a0, 1
+				bltu a0, s5, y_loop ;we continue while a0 < 8
+				
+				;the value of ra is false, we are not able to ret into 0x60
+				;but this command makes us ret into line : add a0, a1, zero ; we re-exchange x and y
+				;why???? was ra modified by set_pixel???
+				ret
+
+			
 	; END:draw_gsa
+
 
 
    
