@@ -29,6 +29,7 @@
     .equ RUNNING, 0x01
 
 main:
+;tests
 	call clear_leds
 	addi a0, zero, 3
 	addi a1, zero, 0
@@ -65,6 +66,25 @@ main:
 	;call draw_gsa
 	;call wait
 
+	;tests for speed
+	addi t0, zero, 3
+	stw t0, SPEED (zero)
+	call change_speed
+	call change_speed
+	addi a0, zero, 1
+	call change_speed
+	call change_speed
+	ldw t0, SPEED (zero)
+
+	;cas limites
+	addi t0, zero, 10
+	stw t0, SPEED (zero)
+	call change_speed
+
+	addi t0, zero, 1
+	
+	stw t0, SPEED (zero)
+	call change_speed
 
 	
     ; BEGIN:clear_leds
@@ -285,6 +305,33 @@ main:
 				bltu a1, s5, random_y_loop
 			ret ;same problem here, we ret to line addi a1, a1, 1 just above, how to store the value of ra???????
 	; END:random_gsa
+
+
+;3.5 action function
+
+	; BEGIN:change_speed
+	change_speed:
+			ldw t0, SPEED (zero)
+			addi t1, zero, 1 ;min value for speed, also used as reference for #1 value
+			addi t2, zero, 10 ; max value for speed
+
+			beq a0, t1, decrement
+			increment:
+				add t0, t0, t1 ;compute new value for speed
+				bge t2, t0, store_speed ;10>=actual_speed we store the speed value, else we will decrement it
+
+			decrement:
+				sub t0, t0, t1 ;compute new value for speed
+				blt t0, t1, increment ; if actual_speed < 1 we increment
+
+			store_speed:
+				stw t0, SPEED (zero)
+			ret
+	; END:change_speed
+
+
+			
+
 
 	
 
