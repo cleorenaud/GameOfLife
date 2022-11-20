@@ -162,6 +162,9 @@ main:
 	
     ; END:set_pixel
 	
+
+
+
 	; BEGIN:wait
     wait:
 		addi t0, zero, 1 ; we put our temporary register to 1
@@ -175,6 +178,8 @@ main:
 		wait_exit:
         	ret
     ; END:wait
+
+
 
 
 	; BEGIN:get_gsa
@@ -193,8 +198,6 @@ main:
 			addi t2, zero, 3 ;should it be +3 or +4 here????
 			bltu t3, a0, a0_loop
 
-
-		
 		beq t0, zero, get_gsa_0 ; if the current gsa is 0 we do get_gsa_0, else we do get_gsa_1
 
 		get_gsa_1:
@@ -208,7 +211,9 @@ main:
 	; END:get_gsa
 
 
-		; BEGIN set_gsa
+
+
+	; BEGIN set_gsa
 	set_gsa:
 		ldw t0, GSA_ID (zero) ; We extract the value determining which is the current gsa
 		;we will loop over a1 to be able to add +0, +4, +8... to index the GSA correctly
@@ -236,6 +241,9 @@ main:
 
 	; END set_gsa
 
+
+
+
     ; BEGIN:draw_gsa
 	draw_gsa:
 		call clear_leds
@@ -245,7 +253,6 @@ main:
 		add a0, zero, zero
 		add a1, zero, zero
 		addi s5, zero, 8
-
 
 		y_loop:
 			add s2, zero, zero ;used to iterate over x's
@@ -278,8 +285,9 @@ main:
 				;why???? was ra modified by set_pixel???
 				ret
 
-			
 	; END:draw_gsa
+
+
 
 
 	; BEGIN:random_gsa
@@ -307,6 +315,8 @@ main:
 	; END:random_gsa
 
 
+
+
 ;3.5 action function
 
 	; BEGIN:change_speed
@@ -329,6 +339,9 @@ main:
 			ret
 	; END:change_speed
 
+
+
+
 	; BEGIN:pause_game
 	pause_game:
 		ldw t0, PAUSE (zero)
@@ -340,7 +353,26 @@ main:
 
 			
 
+	; BEGIN:change_step
+	change_step:
+		ldw t0 CURR_STEP (zero)
+		
+		change_step_b4: ; to set the new value of the units
+			beq a0, zero, change_step_3 ; if button 4 is not pressed we don't change the value of the units
+			addi t1, t0, 1 ; we add 1 to the units
 
+		change_step_b3: ; to set the new value of the tens
+			beq a1, zero, change_step_b2 ; if button 3 is not pressed we don't change the value of the tens
+			addi t1, t0, 17; we add 1 to the tens	
+
+		change_step_b2: ; to set the new value of the hundreds
+			beq a2, zero, change_step_end ; if button 2 is not pressed we don't change the value of the hundreds
+			addi t1, t0, 33; we add 1 to the hundreds
+
+		change_step_end: ; once we have changed what we should, we are done
+			ret
+
+	; END:change_step
 	
 
 
