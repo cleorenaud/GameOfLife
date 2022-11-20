@@ -249,10 +249,8 @@ main:
 		call clear_leds
 		addi s0, zero, 1 ; mask used to determine value at position x
 		add s1, zero, zero ;used to store value of x at given index
-		addi s3, zero, 12 ;max value of x
 		add a0, zero, zero
 		add a1, zero, zero
-		addi s5, zero, 8
 
 		y_loop:
 			add s2, zero, zero ;used to iterate over x's
@@ -275,10 +273,10 @@ main:
 
 			check_if_finished:
 				addi s2, s2, 1
-				bltu s2, s3, x_loop
+				bltu s2, N_GSA_COLUMNS, x_loop
 
 				addi a0, a0, 1
-				bltu a0, s5, y_loop ;we continue while a0 < 8
+				bltu a0, N_GSA_LINES, y_loop ;we continue while a0 < 8
 				
 				;the value of ra is false, we are not able to ret into 0x60
 				;but this command makes us ret into line : add a0, a1, zero ; we re-exchange x and y
@@ -296,8 +294,6 @@ main:
 			add a1, zero, zero
 			addi s0, zero, 1 ;used to mask
 			add s2, zero, zero ;used to iterate over x
-			addi s3, zero, 12 ;max value of x
-			addi s5, zero, 8
 			
 			random_y_loop:
 				random_x_loop:
@@ -306,11 +302,11 @@ main:
 					or a0, a0, s4
 					slli a0, a0, 1
 					addi s2, s2, 1
-					bltu s2, s3, random_x_loop
+					bltu s2, N_GSA_COLUMNS, random_x_loop
 				srli a0, a0, 1
 				call set_gsa
 				addi a1, a1, 1
-				bltu a1, s5, random_y_loop
+				bltu a1, N_GSA_LINES, random_y_loop
 			ret ;same problem here, we ret to line addi a1, a1, 1 just above, how to store the value of ra???????
 	; END:random_gsa
 
@@ -322,17 +318,16 @@ main:
 	; BEGIN:change_speed
 	change_speed:
 			ldw t0, SPEED (zero)
-			addi t1, zero, 1 ;min value for speed, also used as reference for #1 value
-			addi t2, zero, 10 ; max value for speed
+			addi t1, zero, 1 ;reference for #1 value
 
 			beq a0, t1, decrement
 			increment:
 				add t0, t0, t1 ;compute new value for speed
-				bge t2, t0, store_speed ;10>=actual_speed we store the speed value, else we will decrement it
+				bge MAX_SPEED, t0, store_speed ;10>=actual_speed we store the speed value, else we will decrement it
 
 			decrement:
 				sub t0, t0, t1 ;compute new value for speed
-				blt t0, t1, increment ; if actual_speed < 1 we increment
+				blt t0, MIN_SPEED, increment ; if actual_speed < 1 we increment
 
 			store_speed:
 				stw t0, SPEED (zero)
@@ -355,8 +350,8 @@ main:
 
 			
 
-	; BEGIN:change_step
-	change_step:
+	; BEGIN:change_steps
+	change_steps:
 		ldw t0 CURR_STEP (zero)
 		
 		change_step_b4: ; to set the new value of the units
@@ -374,8 +369,27 @@ main:
 		change_step_end: ; once we have changed what we should, we are done
 			ret
 
-	; END:change_step
+	; END:change_steps
+
+	; BEGIN:increment_seed
+	increment_seed:
+				ldw s0, SEED (zero)
+				ldw s1, CURR_STATE (zero)
+
+				beq s1, RAND, rand_seed
+
+				init_seed:
+					addi s0, s0, 1
+					stw s0, SEED (zero)
+					ret
+				
+				rand_seed:
+					call random_gsa
+					ret
+
+				N_SEEDS????????
 	
+	;END:increment_seed
 
 
 
