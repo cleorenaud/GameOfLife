@@ -329,6 +329,14 @@ main:
 			ret
 	; END:change_speed
 
+	; BEGIN:pause_game
+	pause_game:
+		ldw t0, PAUSE (zero)
+		xori t0, t0, 1
+		stw t0, PAUSE (zero)
+		ret
+	; END:pause_game
+
 
 			
 
