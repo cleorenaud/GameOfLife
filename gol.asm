@@ -415,10 +415,10 @@ main:
 
 		update_state_chooser:
 			addi t1, zero, INIT
-			beq t0, t1, update_state_init ; we branch if current state is init
+			beq t0, t1, update_state_init ; we branch if current state is INIT
 	
 			addi t1, zero, RUN
-			beq t0, t1, update_state_run ; we branch if current state is run
+			beq t0, t1, update_state_run ; we branch if current state is RUN
 	
 			addi t1, zero, RAND
 			beq t0, t1, update_state_end ; all cases for when the current state is RAND are already covered
@@ -430,7 +430,7 @@ main:
 			beq t7, zero, update_state_end ; if t7 = 0 then the current state won't change
 			
 			addi t1, zero, INIT ; if t7 = 1 then the new state is INIT
-			;call reset_game ; for any change of state from RUN to INIT the reset_game procedure has to be called
+			call reset_game ; for any change of state from RUN to INIT the reset_game procedure has to be called
 			br update_state_end
 		
 		update_state_init: ; when the current state is INIT
@@ -448,6 +448,15 @@ main:
 			ret
 
 	; END:update_state
+
+
+
+
+	; BEGIN:reset_game
+	reset_game:
+		ret ; for now, reset_game do nothing, only used so that call to reset_game compute
+
+	; END:reset_game
 
 
 
