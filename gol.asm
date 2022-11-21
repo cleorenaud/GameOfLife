@@ -403,7 +403,7 @@ main:
 			beq t7, zero, update_state_end ; if t7 = 0 then the current state won't change
 			
 			addi t1, zero, INIT ; if t7 = 1 then the new state is INIT
-			call reset_game ; for any change of state from RUN to INIT the reset_game procedure has to be called
+			;call reset_game ; for any change of state from RUN to INIT the reset_game procedure has to be called
 			br update_state_end
 		
 		update_state_init: ; when the current state is INIT
