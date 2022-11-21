@@ -29,11 +29,19 @@
     .equ RUNNING, 0x01
 
 main:
-;tests
 
 	;set stack pointer at adequate value
 	addi sp, zero, CUSTOM_VAR_END
 
+
+
+;tests
+
+	;tests cell_fate
+	addi a0, zero, 4
+	addi a1, zero, 1
+	call cell_fate
+	call wait
 
 	;tests increment_seed, should get rand mode 
 	addi t0, zero, 1
@@ -41,7 +49,6 @@ main:
 	call increment_seed
 	call draw_gsa
 	call wait
-
 
 
 	call clear_leds
@@ -988,6 +995,29 @@ main:
 	; END:select_action
 
 
+	; BEGIN:cell_fate
+	cell_fate:
+		addi t0, zero, 1 ;check if cell is alive
+		addi t1, zero, 3 ;three neighbors
+		addi t2, zero, 2 ;two neighbors
+
+		beq t0, a1, is_alive
+		is_dead:
+			;reproduction
+			beq t1, a0, reproduce
+			;nope, will be dead
+			add v0, zero, zero
+			ret
+			reproduce:
+				addi v0, zero, 1
+				ret
+
+		is_alive:
+			bltu a0, t2, is_dead ;neighbors < 2 -> dieeeee
+			bltu t1, a0, is_dead ; 3 < neighbors ----> dieeeee
+			addi v0, zero, 1 ;else lives
+			ret
+	; END:cell_fate
 
 
 	; BEGIN:reset_game
