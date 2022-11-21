@@ -374,6 +374,56 @@ main:
 
 
    
+	; BEGIN:update_state
+	update_state:
+		ldw t0, CURR_STATE (zero) ; t0 = current state
+			
+		; first we will check whether b1 = 1 (if it's the case then next state is RUN
+		addi t7, zero, 1 ; we create a mask
+		srli t6, a0, 1 ; the LSB of t6 is the value of b1
+		and t7, t7, t6 ; if the LSB is 1 then t7 = 1 o/w t7 = 0
+		beq t7, zero, update_state_chooser ; if t7 = 0 then we test other options (based on the current state)
+		addi t1, zero, RUN ; if t7 = 1 then the new state is RUN
+		br update_state_end
+
+		update_state_chooser:
+			addi t1, zero, INIT
+			beq t0, t1, update_state_init ; we branch if current state is init
+	
+			addi t1, zero, RUN
+			beq t0, t1, update_state_run ; we branch if current state is run
+	
+			addi t1, zero, RAND
+			beq t0, t1, update_state_end ; all cases for when the current state is RAND are already covered
+
+		update_state_run: ; when the current state is RUN
+			addi t7, zero, 1 ; we create a mask
+			srli t6, a0, 3 ; the LSB of t6 is the value of b3
+			and t7, t7, t6 ; if the LSB is 1 then t7 = 1 o/w t7 = 0
+			beq t7, zero, update_state_end ; if t7 = 0 then the current state won't change
+			
+			addi t1, zero, INIT ; if t7 = 1 then the new state is INIT
+			call reset_game ; for any change of state from RUN to INIT the reset_game procedure has to be called
+			br update_state_end
+		
+		update_state_init: ; when the current state is INIT
+			; if b0 = N_SEEDS the next state is RAND o/w we do not change
+			ldw t6, SEED (zero) ; t6 = N
+			cmpeqi t7, t6, N_SEEDS ; t7 = 1 if N = N_SEEDS, o/w t7 = 0
+			beq t7, zero, update_state_end; if t7 = 0 we don't change the current state
+		
+			addi t1, zero, RAND	; if t7 = 1 then the new state is RAND
+			br update_state_end
+
+
+		update_state_end:
+			stw t1, CURR_STATE (zero) ; we stock the new current state
+			ret
+
+	; END:update_state
+
+
+
 
 font_data:
     .word 0xFC ; 0
