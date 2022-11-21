@@ -315,24 +315,27 @@ main:
 
 ;3.5 action function
 
-	; BEGIN:change_speed
-	change_speed:
-			ldw t0, SPEED (zero)
-			addi t1, zero, 1 ;reference for #1 value
+	; BEGIN:change_step
+	change_step:
+		ldw t0, CURR_STEP (zero)
+		
+		change_step_b4: ; to set the new value of the units
+			beq a0, zero, change_step_b3 ; if button 4 is not pressed we don't change the value of the units
+			addi t0, t0, 1 ; we add 1 to the units
 
-			beq a0, t1, decrement
-			increment:
-				add t0, t0, t1 ;compute new value for speed
-				bge MAX_SPEED, t0, store_speed ;10>=actual_speed we store the speed value, else we will decrement it
+		change_step_b3: ; to set the new value of the tens
+			beq a1, zero, change_step_b2 ; if button 3 is not pressed we don't change the value of the tens
+			addi t0, t0, 16; we add 1 to the tens	
 
-			decrement:
-				sub t0, t0, t1 ;compute new value for speed
-				blt t0, MIN_SPEED, increment ; if actual_speed < 1 we increment
+		change_step_b2: ; to set the new value of the hundreds
+			beq a2, zero, change_step_end ; if button 2 is not pressed we don't change the value of the hundreds
+			addi t0, t0, 256; we add 1 to the hundreds
 
-			store_speed:
-				stw t0, SPEED (zero)
+		change_step_end: ; once we have changed what we should, we are done
+			stw t0, CURR_STEP (zero)
 			ret
-	; END:change_speed
+
+	; END:change_step
 
 
 
