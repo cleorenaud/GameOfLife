@@ -801,6 +801,204 @@ main:
 
 
 
+	; BEGIN:select_action
+	select_action:
+		stw t0, CURR_STATE (zero) ; based on the current state, each button doesn't have the same effect
+		
+		select_action_state_chooser:
+			addi t1, zero, INIT
+			beq t0, t1, select_action_init ; we branch if current state is INIT
+	
+			addi t1, zero, RUN
+			beq t0, t1, select_action_run ; we branch if current state is RUN
+	
+			addi t1, zero, RAND
+			beq t0, t1, select_action_rand ; we branch if current state is RAND
+	
+		select_action_init:
+			addi t1, zero, 1 ; t1 will be a mask to check whether a button is pressed
+			add t0, zero, a0 ; t0 = a0
+		
+			s_a_init_b0:
+				and t2, t1, t0 ; t2 = 1 if b0 is pressed. t2 = 0 o/w
+				beq t2, zero, s_a_init_b1 ; if b0 isn't pressed we check the other buttons
+				
+				; we push the current ra to the stack
+				addi sp, sp, -4 
+				stw ra, 0 (sp)
+				call increment_seed ; if b0 is pressed we go through the predefined seeds
+				; we retrieve the current ra from the stack
+				ldw ra, 0 (sp)
+				addi sp, sp, 4
+
+			s_a_init_b1:
+				srli t0, t0, 1 ; we shift a0, this way its LSB is b1
+				; whether b1 is pressed or not, we just have to update the state
+
+			s_a_init_b2:
+				srli t0, t0, 1 ; we shift a0, this way its LSB is b2
+				and t2, t1, t0 ; t2 = 1 if b2 is pressed. t2 = 0 o/w0
+				addi a0, zero, 0 ; if b2 isn't pressed we set a2 to 0
+				beq t2, zero, s_a_init_b3 ; if b2 isn't pressed we check the other buttons
+				addi a2, zero, 1 ; if b2 is pressed we set a2 to 1
+
+			s_a_init_b3:
+				srli t0, t0, 1 ; we shift a0, this way its LSB is b3
+				and t2, t1, t0 ; t2 = 1 if b3 is pressed. t2 = 0 o/w0
+				addi a1, zero, 0 ; if b3 isn't pressed we set a1 to 0
+				beq t2, zero, s_a_init_b4 ; if b3 isn't pressed we check the other buttons
+				addi a1, zero, 1; if b3 is pressed we set a1 to 1
+
+			s_a_init_b4:
+				srli t0, t0, 1 ; we shift a0, this way its LSB is b4
+				and t2, t1, t0 ; t2 = 1 if b4 is pressed. t2 = 0 o/w0
+				addi a0, zero, 0 ; if b3 isn't pressed we set a0 to 1
+				beq t2, zero, s_a_init_steps ; if b4 isn't pressed we are done
+				addi a0, zero, 1 ; if b4 is pressed we set a0 to 1
+
+			s_a_init_steps:
+				; we push the current ra to the stack
+				addi sp, sp, -4 
+				stw ra, 0 (sp)
+				call change_steps ; we call change_steps 
+				; we retrieve the current ra from the stack
+				ldw ra, 0 (sp)
+				addi sp, sp, 4
+
+				br select_action_end
+			
+
+		select_action_rand:
+			addi t1, zero, 1 ; t1 will be a mask to check whether a button is pressed
+			add t0, zero, a0 ; t0 = a0
+		
+			s_a_rand_b0:
+				and t2, t1, t0 ; t2 = 1 if b0 is pressed. t2 = 0 o/w
+				; whether b0 is pressed or not, we just have to update the state
+
+			s_a_rand_b1:
+				srli t0, t0, 1 ; we shift a0, this way its LSB is b1
+				; whether b1 is pressed ot not, we just have to update the state
+
+			s_a_rand_b2:
+				srli t0, t0, 1 ; we shift a0, this way its LSB is b2
+				and t2, t1, t0 ; t2 = 1 if b2 is pressed. t2 = 0 o/w0
+				addi a0, zero, 0 ; if b2 isn't pressed we set a2 to 0
+				beq t2, zero, s_a_rand_b3 ; if b2 isn't pressed we check the other buttons
+				addi a2, zero, 1 ; if b2 is pressed we set a2 to 1
+
+			s_a_rand_b3:
+				srli t0, t0, 1 ; we shift a0, this way its LSB is b3
+				and t2, t1, t0 ; t2 = 1 if b3 is pressed. t2 = 0 o/w0
+				addi a1, zero, 0 ; if b3 isn't pressed we set a1 to 0
+				beq t2, zero, s_a_rand_b4 ; if b3 isn't pressed we check the other buttons
+				addi a1, zero, 1; if b3 is pressed we set a1 to 1
+
+			s_a_rand_b4:
+				srli t0, t0, 1 ; we shift a0, this way its LSB is b4
+				and t2, t1, t0 ; t2 = 1 if b4 is pressed. t2 = 0 o/w0
+				addi a0, zero, 0 ; if b3 isn't pressed we set a0 to 1
+				beq t2, zero, s_a_rand_steps ; if b4 isn't pressed we are done
+				addi a0, zero, 1 ; if b4 is pressed we set a0 to 1
+
+			s_a_rand_steps:
+				; we push the current ra to the stack
+				addi sp, sp, -4 
+				stw ra, 0 (sp)
+				call change_steps ; we call change_steps 
+				; we retrieve the current ra from the stack
+				ldw ra, 0 (sp)
+				addi sp, sp, 4
+				
+				br select_action_end 
+
+		select_action_run:
+			addi t1, zero, 1 ; t1 will be a mask to check whether a button is pressed
+			add t0, zero, a0 ; t0 = a0
+		
+			s_a_run_b0:
+				and t2, t1, t0 ; t2 = 1 if b0 is pressed. t2 = 0 o/w
+				beq t2, zero, s_a_run_b1 ; if b0 isn't pressed we check the other buttons
+				; we push the current ra to the stack
+				addi sp, sp, -4 
+				stw ra, 0 (sp)
+				call pause_game ; if b0 is pressed we call pause_game
+				; we retrieve the current ra from the stack
+				ldw ra, 0 (sp)
+				addi sp, sp, 4
+				
+
+			s_a_run_b1:
+				srli t0, t0, 1 ; we shift a0, this way its LSB is b1
+				and t2, t1, t0 ; t2 = 1 if b1 is pressed. t2 = 0 o/w0
+				beq t2, zero, s_a_run_b2 ; if b1 isn't pressed we check the other buttons
+				addi a0, zero, 0 ; a0 = 0 as we will increase the game speed
+				; we push the current ra to the stack
+				addi sp, sp, -4 
+				stw ra, 0 (sp)
+				call change_speed ; if b1 is pressed we increase the game speed
+				; we retrieve the current ra from the stack
+				ldw ra, 0 (sp)
+				addi sp, sp, 4
+
+			s_a_run_b2:
+				srli t0, t0, 1 ; we shift a0, this way its LSB is b2
+				and t2, t1, t0 ; t2 = 1 if b2 is pressed. t2 = 0 o/w0
+				beq t2, zero, s_a_run_b3 ; if b2 isn't pressed we check the other buttons
+				addi a0, zero, 1 ; a0 = 1 as we will decrease the game speed
+				; we push the current ra to the stack
+				addi sp, sp, -4 
+				stw ra, 0 (sp)
+				call change_speed ; if b2 is pressed we decrease the game speed
+				; we retrieve the current ra from the stack
+				ldw ra, 0 (sp)
+				addi sp, sp, 4
+
+			s_a_run_b3:
+				srli t0, t0, 1 ; we shift a0, this way its LSB is b3
+				and t2, t1, t0 ; t2 = 1 if b3 is pressed. t2 = 0 o/w0
+				beq t2, zero, s_a_run_b4 ; if b3 isn't pressed we check the other buttons
+				; we push the current ra to the stack
+				addi sp, sp, -4 
+				stw ra, 0 (sp)
+				call reset_game ; if b3 is pressed we reset the game
+				; we retrieve the current ra from the stack
+				ldw ra, 0 (sp)
+				addi sp, sp, 4
+
+			s_a_run_b4:
+				srli t0, t0, 1 ; we shift a0, this way its LSB is b4
+				and t2, t1, t0 ; t2 = 1 if b4 is pressed. t2 = 0 o/w0
+				beq t2, zero, select_action_end ; if b4 isn't pressed we are done
+				; if b4 is pressed we remplace the current game with a new random one
+				
+				; TO DO
+
+		select_action_end:
+			; we push the current ra to the stack
+			addi sp, sp, -4 
+			stw ra, 0 (sp)
+			call update_state ; we also call update state
+			; we retrieve the current ra from the stack
+			ldw ra, 0 (sp)
+			addi sp, sp, 4
+			
+			ret
+	
+	; END:select_action
+
+
+
+
+	; BEGIN:reset_game
+	reset_game:
+		ret ; for now, reset_game do nothing, only used so that call to reset_game compute
+
+	; END:reset_game
+
+
+
+
 font_data:
     .word 0xFC ; 0
     .word 0x60 ; 1
