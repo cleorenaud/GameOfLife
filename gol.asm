@@ -203,7 +203,7 @@ main:
 	; END:get_gsa
 
 
-		; BEGIN set_gsa
+	; BEGIN set_gsa
 	set_gsa:
 		ldw t0, GSA_ID (zero) ; We extract the value determining which is the current gsa
 		;we will loop over a1 to be able to add +0, +4, +8... to index the GSA correctly
