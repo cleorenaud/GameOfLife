@@ -31,40 +31,25 @@
 main:
 ;tests
 
-	;tests increment_seed, should get seed 1
+	;set stack pointer at adequate value
+	addi sp, zero, CUSTOM_VAR_END
+
+
+	;tests increment_seed, should get rand mode 
+	addi t0, zero, 1
+	stw t0, CURR_STATE (zero)
 	call increment_seed
 	call draw_gsa
 	call wait
 
 
 
-
 	call clear_leds
-	addi a0, zero, 3
-	addi a1, zero, 0
-	call set_gsa
+
 	addi a0, zero, 67
 	addi a1, zero, 1
 	call set_gsa
-	addi a0, zero, 128
-	addi a1, zero, 2
-	call set_gsa
-	addi a0, zero, 224
-	addi a1, zero, 3
-	call set_gsa
-	addi a0, zero, 0
-	addi a1, zero, 4
-	call set_gsa
-	addi a0, zero, 2
-	addi a1, zero, 5
-	call set_gsa
-	addi a0, zero, 4
-	addi a1, zero, 6
-	call set_gsa
-	addi a0, zero, 7
-	addi a1, zero, 7
-	call set_gsa
-
+	
 	call draw_gsa
 	call wait
 	;We should get the same leds lighting up as in the 3.3.1!!!!
@@ -169,7 +154,7 @@ main:
 			or t0, t0, t6
 			stw t0, LEDS+8 (zero)
 			ret
-
+			
     ; END:set_pixel
 	
 	; BEGIN:wait
@@ -243,16 +228,18 @@ main:
 		set_gsa_0:
 			stw a0, GSA0 (t1) ; we store the y line in its position in the current gsa
 		ret
-		
-		ret
 
 	; END set_gsa
 
     ; BEGIN:draw_gsa
 	draw_gsa:
-		add ba, ra, zero
+
+		addi sp, sp, -4
+		stw ra, 0(sp)
 		call clear_leds
-		add ra, ba, zero
+		ldw ra, 0(sp)
+		addi sp, sp, 4
+
 		addi s0, zero, 1 ; mask used to determine value at position x
 		add s1, zero, zero ;used to store value of x at given index
 		addi s3, zero, N_GSA_COLUMNS ;max value of x
@@ -263,9 +250,13 @@ main:
 
 		y_loop:
 			add s2, zero, zero ;used to iterate over x's
-			add ba, ra, zero
+
+			addi sp, sp, -4
+			stw ra, 0(sp)
 			call get_gsa
-			add ra, ba, zero
+			ldw ra, 0(sp)
+			addi sp, sp, 4
+			
 			add s4, v0, zero
 			
 			x_loop:
@@ -277,9 +268,13 @@ main:
 				;setting_pixels
 				add a1, a0, zero ;we exchange x and y for set_pixel
 				add a0, s2, zero ;we add value of x to a0
-				add ba, ra, zero
+
+				addi sp, sp, -4
+				stw ra, 0(sp)
 				call set_pixel
-				add ra, ba, zero
+				ldw ra, 0(sp)
+				addi sp, sp, 4
+				
 				add a0, a1, zero ; we re-exchange x and y
 				add a1, zero, zero ;we exchange x and y for set_pixel
 
@@ -317,9 +312,13 @@ main:
 					addi s2, s2, 1
 					bltu s2, s3, random_x_loop
 				srli a0, a0, 1
-				add ba, ra, zero
+
+				addi sp, sp, -4
+				stw ra, 0(sp)
 				call set_gsa
-				add ra, ba, zero
+				ldw ra, 0(sp)
+				addi sp, sp, 4
+
 				addi a1, a1, 1
 				bltu a1, s5, random_y_loop
 			ret
@@ -411,27 +410,43 @@ main:
 						;0
 						add a1, zero, zero
 						ldw a0, seed0 (zero)
-						add ba, ra, zero
+
+						addi sp, sp, -4
+						stw ra, 0(sp)
 						call set_gsa
-						add ra, ba, zero
+						ldw ra, 0(sp)
+						addi sp, sp, 4
+
 						;1
 						addi a1, zero, 1
 						ldw a0, seed0+4 (zero)
-						add ba, ra, zero
+					
+						addi sp, sp, -4
+						stw ra, 0(sp)
 						call set_gsa
-						add ra, ba, zero
+						ldw ra, 0(sp)
+						addi sp, sp, 4
+
 						;2
 						addi a1, zero, 2
 						ldw a0, seed0+8 (zero)
-						add ba, ra, zero
+
+						addi sp, sp, -4
+						stw ra, 0(sp)
 						call set_gsa
-						add ra, ba, zero
+						ldw ra, 0(sp)
+						addi sp, sp, 4
+
 						;3
 						addi a1, zero, 3
 						ldw a0, seed0+12 (zero)
-						add ba, ra, zero
+
+						addi sp, sp, -4
+						stw ra, 0(sp)
 						call set_gsa
-						add ra, ba, zero
+						ldw ra, 0(sp)
+						addi sp, sp, 4
+
 						;4
 						addi a1, zero, 4
 						ldw a0, seed0+16 (zero)
@@ -441,21 +456,32 @@ main:
 						;5
 						addi a1, zero, 5
 						ldw a0, seed0+20 (zero)
-						add ba, ra, zero
+
+						addi sp, sp, -4
+						stw ra, 0(sp)
 						call set_gsa
-						add ra, ba, zero
+						ldw ra, 0(sp)
+						addi sp, sp, 4
+
 						;6
 						addi a1, zero, 6
 						ldw a0, seed0+24 (zero)
-						add ba, ra, zero
+
+						addi sp, sp, -4
+						stw ra, 0(sp)
 						call set_gsa
-						add ra, ba, zero
+						ldw ra, 0(sp)
+						addi sp, sp, 4
+
 						;7
 						addi a1, zero, 7
 						ldw a0, seed0+28 (zero)
-						add ba, ra, zero
+
+						addi sp, sp, -4
+						stw ra, 0(sp)
 						call set_gsa
-						add ra, ba, zero
+						ldw ra, 0(sp)
+						addi sp, sp, 4
 
 					ret
 
@@ -463,51 +489,82 @@ main:
 						;0
 						add a1, zero, zero
 						ldw a0, seed1 (zero)
-						add ba, ra, zero
+
+						addi sp, sp, -4
+						stw ra, 0(sp)
 						call set_gsa
-						add ra, ba, zero
+						ldw ra, 0(sp)
+						addi sp, sp, 4
+
 						;1
 						addi a1, zero, 1
 						ldw a0, seed1+4 (zero)
-						add ba, ra, zero
+
+						addi sp, sp, -4
+						stw ra, 0(sp)
 						call set_gsa
-						add ra, ba, zero
+						ldw ra, 0(sp)
+						addi sp, sp, 4
+
 						;2
 						addi a1, zero, 2
 						ldw a0, seed1+8 (zero)
-						add ba, ra, zero
+
+						addi sp, sp, -4
+						stw ra, 0(sp)
 						call set_gsa
-						add ra, ba, zero
+						ldw ra, 0(sp)
+						addi sp, sp, 4
+
 						;3
 						addi a1, zero, 3
 						ldw a0, seed1+12 (zero)
-						add ba, ra, zero
+
+						addi sp, sp, -4
+						stw ra, 0(sp)
 						call set_gsa
-						add ra, ba, zero
+						ldw ra, 0(sp)
+						addi sp, sp, 4
+
 						;4
 						addi a1, zero, 4
 						ldw a0, seed1+16 (zero)
-						add ba, ra, zero
+
+						addi sp, sp, -4
+						stw ra, 0(sp)
 						call set_gsa
-						add ra, ba, zero
+						ldw ra, 0(sp)
+						addi sp, sp, 4
+
 						;5
 						addi a1, zero, 5
 						ldw a0, seed1+20 (zero)
-						add ba, ra, zero
+
+						addi sp, sp, -4
+						stw ra, 0(sp)
 						call set_gsa
-						add ra, ba, zero
+						ldw ra, 0(sp)
+						addi sp, sp, 4
+
 						;6
 						addi a1, zero, 6
 						ldw a0, seed1+24 (zero)
-						add ba, ra, zero
+
+						addi sp, sp, -4
+						stw ra, 0(sp)
 						call set_gsa
-						add ra, ba, zero
+						ldw ra, 0(sp)
+						addi sp, sp, 4
+
 						;7
 						addi a1, zero, 7
 						ldw a0, seed1+28 (zero)
-						add ba, ra, zero
+
+						addi sp, sp, -4
+						stw ra, 0(sp)
 						call set_gsa
-						add ra, ba, zero
+						ldw ra, 0(sp)
+						addi sp, sp, 4
 
 					ret
 
@@ -516,27 +573,43 @@ main:
 						;0
 						add a1, zero, zero
 						ldw a0, seed2 (zero)
-						add ba, ra, zero
+
+						addi sp, sp, -4
+						stw ra, 0(sp)
 						call set_gsa
-						add ra, ba, zero
+						ldw ra, 0(sp)
+						addi sp, sp, 4
+
 						;1
 						addi a1, zero, 1
 						ldw a0, seed2+4 (zero)
-						add ba, ra, zero
+
+						addi sp, sp, -4
+						stw ra, 0(sp)
 						call set_gsa
-						add ra, ba, zero
+						ldw ra, 0(sp)
+						addi sp, sp, 4
+
 						;2
 						addi a1, zero, 2
 						ldw a0, seed2+8 (zero)
-						add ba, ra, zero
+
+						addi sp, sp, -4
+						stw ra, 0(sp)
 						call set_gsa
-						add ra, ba, zero
+						ldw ra, 0(sp)
+						addi sp, sp, 4
+
 						;3
 						addi a1, zero, 3
 						ldw a0, seed2+12 (zero)
-						add ba, ra, zero
+
+						addi sp, sp, -4
+						stw ra, 0(sp)
 						call set_gsa
-						add ra, ba, zero
+						ldw ra, 0(sp)
+						addi sp, sp, 4
+
 						;4
 						addi a1, zero, 4
 						ldw a0, seed2+16 (zero)
@@ -546,21 +619,32 @@ main:
 						;5
 						addi a1, zero, 5
 						ldw a0, seed2+20 (zero)
-						add ba, ra, zero
+
+						addi sp, sp, -4
+						stw ra, 0(sp)
 						call set_gsa
-						add ra, ba, zero
+						ldw ra, 0(sp)
+						addi sp, sp, 4
+
 						;6
 						addi a1, zero, 6
 						ldw a0, seed2+24 (zero)
-						add ba, ra, zero
+
+						addi sp, sp, -4
+						stw ra, 0(sp)
 						call set_gsa
-						add ra, ba, zero
+						ldw ra, 0(sp)
+						addi sp, sp, 4
+
 						;7
 						addi a1, zero, 7
 						ldw a0, seed2+28 (zero)
-						add ba, ra, zero
+
+						addi sp, sp, -4
+						stw ra, 0(sp)
 						call set_gsa
-						add ra, ba, zero
+						ldw ra, 0(sp)
+						addi sp, sp, 4
 
 					ret
 
@@ -569,68 +653,103 @@ main:
 						;0
 						add a1, zero, zero
 						ldw a0, seed3 (zero)
-						add ba, ra, zero
+
+						addi sp, sp, -4
+						stw ra, 0(sp)
 						call set_gsa
-						add ra, ba, zero
+						ldw ra, 0(sp)
+						addi sp, sp, 4
+
 						;1
 						addi a1, zero, 1
 						ldw a0, seed3+4 (zero)
-						add ba, ra, zero
+
+						addi sp, sp, -4
+						stw ra, 0(sp)
 						call set_gsa
-						add ra, ba, zero
+						ldw ra, 0(sp)
+						addi sp, sp, 4
+
 						;2
 						addi a1, zero, 2
 						ldw a0, seed3+8 (zero)
-						add ba, ra, zero
+
+						addi sp, sp, -4
+						stw ra, 0(sp)
 						call set_gsa
-						add ra, ba, zero
+						ldw ra, 0(sp)
+						addi sp, sp, 4
+
 						;3
 						addi a1, zero, 3
 						ldw a0, seed3+12 (zero)
-						add ba, ra, zero
+
+						addi sp, sp, -4
+						stw ra, 0(sp)
 						call set_gsa
-						add ra, ba, zero
+						ldw ra, 0(sp)
+						addi sp, sp, 4
+
 						;4
 						addi a1, zero, 4
 						ldw a0, seed3+16 (zero)
-						add ba, ra, zero
+
+						addi sp, sp, -4
+						stw ra, 0(sp)
 						call set_gsa
-						add ra, ba, zero
+						ldw ra, 0(sp)
+						addi sp, sp, 4
+
 						;5
 						addi a1, zero, 5
 						ldw a0, seed3+20 (zero)
-						add ba, ra, zero
+
+						addi sp, sp, -4
+						stw ra, 0(sp)
 						call set_gsa
-						add ra, ba, zero
+						ldw ra, 0(sp)
+						addi sp, sp, 4
+
 						;6
 						addi a1, zero, 6
 						ldw a0, seed3+24 (zero)
-						add ba, ra, zero
+
+						addi sp, sp, -4
+						stw ra, 0(sp)
 						call set_gsa
-						add ra, ba, zero
+						ldw ra, 0(sp)
+						addi sp, sp, 4
+
 						;7
 						addi a1, zero, 7
 						ldw a0, seed3+28 (zero)
-						add ba, ra, zero
+
+						addi sp, sp, -4
+						stw ra, 0(sp)
 						call set_gsa
-						add ra, ba, zero
+						ldw ra, 0(sp)
+						addi sp, sp, 4
 
 					ret
 				
 				rand_seed:
 					addi t0, zero, N_SEEDS
 					stw t0, SEED (zero)
-					add ba, ra, zero
+
+
+					addi sp, sp, -4
+					stw ra, 0(sp)
 					call random_gsa
-					add ra, ba, zero
+					ldw ra, 0(sp)
+					addi sp, sp, 4
+				
 				ret
 	
 	;END:increment_seed
 
 
 
-
-   ;if seed is 4, we go to state rand
+   
 	; BEGIN:update_state
 	update_state:
 		ldw t0, CURR_STATE (zero) ; t0 = current state
@@ -645,10 +764,10 @@ main:
 
 		update_state_chooser:
 			addi t1, zero, INIT
-			beq t0, t1, update_state_init ; we branch if current state is INIT
+			beq t0, t1, update_state_init ; we branch if current state is init
 	
 			addi t1, zero, RUN
-			beq t0, t1, update_state_run ; we branch if current state is RUN
+			beq t0, t1, update_state_run ; we branch if current state is run
 	
 			addi t1, zero, RAND
 			beq t0, t1, update_state_end ; all cases for when the current state is RAND are already covered
@@ -660,7 +779,7 @@ main:
 			beq t7, zero, update_state_end ; if t7 = 0 then the current state won't change
 			
 			addi t1, zero, INIT ; if t7 = 1 then the new state is INIT
-			call reset_game ; for any change of state from RUN to INIT the reset_game procedure has to be called
+			;call reset_game ; for any change of state from RUN to INIT the reset_game procedure has to be called
 			br update_state_end
 		
 		update_state_init: ; when the current state is INIT
@@ -678,15 +797,6 @@ main:
 			ret
 
 	; END:update_state
-
-
-
-
-	; BEGIN:reset_game
-	reset_game:
-		ret ; for now, reset_game do nothing, only used so that call to reset_game compute
-
-	; END:reset_game
 
 
 
