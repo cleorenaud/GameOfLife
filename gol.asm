@@ -30,6 +30,15 @@
 
 main:
 ;tests
+
+	;tests increment_seed, should get seed 1
+	call increment_seed
+	call draw_gsa
+	call wait
+
+
+
+
 	call clear_leds
 	addi a0, zero, 3
 	addi a1, zero, 0
@@ -160,7 +169,7 @@ main:
 			or t0, t0, t6
 			stw t0, LEDS+8 (zero)
 			ret
-			
+
     ; END:set_pixel
 	
 	; BEGIN:wait
@@ -385,22 +394,243 @@ main:
 				init_seed:
 					addi t0, t0, 1
 					stw t0, SEED (zero)
+
+					;we update the gsa with the given seed 0,1,2 or 3
+					add t3, zero, zero
+					addi t4, zero, 1
+					addi t5, zero, 2
+					addi t6, zero, 3
+
+					beq t0, t3, load_seed_0
+					beq t0, t4, load_seed_1
+					beq t0, t5, load_seed_2
+					beq t0, t6, load_seed_3
+					ret ; if we incremented and it is =4, we exit
+	
+					load_seed_0:
+						;0
+						add a1, zero, zero
+						ldw a0, seed0 (zero)
+						add ba, ra, zero
+						call set_gsa
+						add ra, ba, zero
+						;1
+						addi a1, zero, 1
+						ldw a0, seed0+4 (zero)
+						add ba, ra, zero
+						call set_gsa
+						add ra, ba, zero
+						;2
+						addi a1, zero, 2
+						ldw a0, seed0+8 (zero)
+						add ba, ra, zero
+						call set_gsa
+						add ra, ba, zero
+						;3
+						addi a1, zero, 3
+						ldw a0, seed0+12 (zero)
+						add ba, ra, zero
+						call set_gsa
+						add ra, ba, zero
+						;4
+						addi a1, zero, 4
+						ldw a0, seed0+16 (zero)
+						add ba, ra, zero
+						call set_gsa
+						add ra, ba, zero
+						;5
+						addi a1, zero, 5
+						ldw a0, seed0+20 (zero)
+						add ba, ra, zero
+						call set_gsa
+						add ra, ba, zero
+						;6
+						addi a1, zero, 6
+						ldw a0, seed0+24 (zero)
+						add ba, ra, zero
+						call set_gsa
+						add ra, ba, zero
+						;7
+						addi a1, zero, 7
+						ldw a0, seed0+28 (zero)
+						add ba, ra, zero
+						call set_gsa
+						add ra, ba, zero
+
+					ret
+
+					load_seed_1:
+						;0
+						add a1, zero, zero
+						ldw a0, seed1 (zero)
+						add ba, ra, zero
+						call set_gsa
+						add ra, ba, zero
+						;1
+						addi a1, zero, 1
+						ldw a0, seed1+4 (zero)
+						add ba, ra, zero
+						call set_gsa
+						add ra, ba, zero
+						;2
+						addi a1, zero, 2
+						ldw a0, seed1+8 (zero)
+						add ba, ra, zero
+						call set_gsa
+						add ra, ba, zero
+						;3
+						addi a1, zero, 3
+						ldw a0, seed1+12 (zero)
+						add ba, ra, zero
+						call set_gsa
+						add ra, ba, zero
+						;4
+						addi a1, zero, 4
+						ldw a0, seed1+16 (zero)
+						add ba, ra, zero
+						call set_gsa
+						add ra, ba, zero
+						;5
+						addi a1, zero, 5
+						ldw a0, seed1+20 (zero)
+						add ba, ra, zero
+						call set_gsa
+						add ra, ba, zero
+						;6
+						addi a1, zero, 6
+						ldw a0, seed1+24 (zero)
+						add ba, ra, zero
+						call set_gsa
+						add ra, ba, zero
+						;7
+						addi a1, zero, 7
+						ldw a0, seed1+28 (zero)
+						add ba, ra, zero
+						call set_gsa
+						add ra, ba, zero
+
+					ret
+
+
+					load_seed_2:
+						;0
+						add a1, zero, zero
+						ldw a0, seed2 (zero)
+						add ba, ra, zero
+						call set_gsa
+						add ra, ba, zero
+						;1
+						addi a1, zero, 1
+						ldw a0, seed2+4 (zero)
+						add ba, ra, zero
+						call set_gsa
+						add ra, ba, zero
+						;2
+						addi a1, zero, 2
+						ldw a0, seed2+8 (zero)
+						add ba, ra, zero
+						call set_gsa
+						add ra, ba, zero
+						;3
+						addi a1, zero, 3
+						ldw a0, seed2+12 (zero)
+						add ba, ra, zero
+						call set_gsa
+						add ra, ba, zero
+						;4
+						addi a1, zero, 4
+						ldw a0, seed2+16 (zero)
+						add ba, ra, zero
+						call set_gsa
+						add ra, ba, zero
+						;5
+						addi a1, zero, 5
+						ldw a0, seed2+20 (zero)
+						add ba, ra, zero
+						call set_gsa
+						add ra, ba, zero
+						;6
+						addi a1, zero, 6
+						ldw a0, seed2+24 (zero)
+						add ba, ra, zero
+						call set_gsa
+						add ra, ba, zero
+						;7
+						addi a1, zero, 7
+						ldw a0, seed2+28 (zero)
+						add ba, ra, zero
+						call set_gsa
+						add ra, ba, zero
+
+					ret
+
+
+					load_seed_3:
+						;0
+						add a1, zero, zero
+						ldw a0, seed3 (zero)
+						add ba, ra, zero
+						call set_gsa
+						add ra, ba, zero
+						;1
+						addi a1, zero, 1
+						ldw a0, seed3+4 (zero)
+						add ba, ra, zero
+						call set_gsa
+						add ra, ba, zero
+						;2
+						addi a1, zero, 2
+						ldw a0, seed3+8 (zero)
+						add ba, ra, zero
+						call set_gsa
+						add ra, ba, zero
+						;3
+						addi a1, zero, 3
+						ldw a0, seed3+12 (zero)
+						add ba, ra, zero
+						call set_gsa
+						add ra, ba, zero
+						;4
+						addi a1, zero, 4
+						ldw a0, seed3+16 (zero)
+						add ba, ra, zero
+						call set_gsa
+						add ra, ba, zero
+						;5
+						addi a1, zero, 5
+						ldw a0, seed3+20 (zero)
+						add ba, ra, zero
+						call set_gsa
+						add ra, ba, zero
+						;6
+						addi a1, zero, 6
+						ldw a0, seed3+24 (zero)
+						add ba, ra, zero
+						call set_gsa
+						add ra, ba, zero
+						;7
+						addi a1, zero, 7
+						ldw a0, seed3+28 (zero)
+						add ba, ra, zero
+						call set_gsa
+						add ra, ba, zero
+
 					ret
 				
 				rand_seed:
-					;???addi t0, t0, 1
+					addi t0, zero, N_SEEDS
+					stw t0, SEED (zero)
 					add ba, ra, zero
 					call random_gsa
 					add ra, ba, zero
 				ret
-
-				;???update the current GSA
 	
 	;END:increment_seed
 
 
 
-   
+
+   ;if seed is 4, we go to state rand
 	; BEGIN:update_state
 	update_state:
 		ldw t0, CURR_STATE (zero) ; t0 = current state
