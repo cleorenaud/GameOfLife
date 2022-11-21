@@ -348,31 +348,8 @@ main:
 		ret
 	; END:pause_game
 
-	
 
 
-			
-
-	; BEGIN:change_steps
-	change_steps:
-		ldw t0 CURR_STEP (zero)
-		
-		change_step_b4: ; to set the new value of the units
-			beq a0, zero, change_step_3 ; if button 4 is not pressed we don't change the value of the units
-			addi t1, t0, 1 ; we add 1 to the units
-
-		change_step_b3: ; to set the new value of the tens
-			beq a1, zero, change_step_b2 ; if button 3 is not pressed we don't change the value of the tens
-			addi t1, t0, 17; we add 1 to the tens	
-
-		change_step_b2: ; to set the new value of the hundreds
-			beq a2, zero, change_step_end ; if button 2 is not pressed we don't change the value of the hundreds
-			addi t1, t0, 33; we add 1 to the hundreds
-
-		change_step_end: ; once we have changed what we should, we are done
-			ret
-
-	; END:change_steps
 
 	; BEGIN:increment_seed
 	increment_seed:
