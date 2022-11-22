@@ -36,6 +36,51 @@ main:
 
 
 ;tests
+	; Test update_state
+	;test update state (init+b1=run)
+	stw zero, CURR_STATE (zero)
+	addi a0, zero, 0b00010
+	call update_state
+
+	;test update state (init+b0=init if b0<N)
+	stw zero, CURR_STATE (zero)
+	addi t0, zero, 2
+	stw t0 , SEED (zero)
+	addi a0, zero, 0b00001
+	call update_state
+
+	;test update state (init+b0=rand if b0=N)
+	addi t0, zero, 3
+	stw t0 , SEED (zero)
+	addi a0, zero, 0b0001
+	call update_state
+
+	;test update state (run+b3=init)
+	addi t0, zero, 2
+	stw t0, CURR_STATE (zero)
+	addi a0, zero, 0b01000
+	call update_state
+
+	;test update state (run+!b3=run)
+	addi t0, zero, 2
+	stw t0, CURR_STATE (zero)
+	addi a0, zero, 0b00001
+	call update_state
+
+	;test update state (rand+b1=run)
+	addi t0, zero, 1
+	stw t0, CURR_STATE (zero)
+	addi a0, zero, 0b00010
+	call update_state
+
+	;test update state (rand+!b1=rand)
+	addi t0, zero, 1
+	stw t0, CURR_STATE (zero)
+	addi a0, zero, 0b00001
+	call update_state
+
+	;test update_state end
+
 
 	;tests cell_fate
 	addi a0, zero, 4
@@ -771,10 +816,10 @@ main:
 
 		update_state_chooser:
 			addi t1, zero, INIT
-			beq t0, t1, update_state_init ; we branch if current state is init
+			beq t0, t1, update_state_init ; we branch if current state is INIT
 	
 			addi t1, zero, RUN
-			beq t0, t1, update_state_run ; we branch if current state is run
+			beq t0, t1, update_state_run ; we branch if current state is RUN
 	
 			addi t1, zero, RAND
 			beq t0, t1, update_state_end ; all cases for when the current state is RAND are already covered
@@ -786,24 +831,36 @@ main:
 			beq t7, zero, update_state_end ; if t7 = 0 then the current state won't change
 			
 			addi t1, zero, INIT ; if t7 = 1 then the new state is INIT
-			;call reset_game ; for any change of state from RUN to INIT the reset_game procedure has to be called
+			; we push the current ra to the stack
+			addi sp, sp, -4 
+			stw ra, 0 (sp)
+			call reset_game ; for any change of state from RUN to INIT the reset_game procedure has to be called
+			; we retrieve the current ra from the stack
+			ldw ra, 0 (sp)
+			addi sp, sp, 4
 			br update_state_end
 		
 		update_state_init: ; when the current state is INIT
+			; first we check whether b0 is active
+			addi t7, zero, 1 ; we create a mask
+			and t7, t7, a0 ; if the LSB is 1 then t7 = 1 o/w t7 = 0
+			beq t7, zero, update_state_end ; if t7 = 0 then the current state won't change
+
 			; if b0 = N_SEEDS the next state is RAND o/w we do not change
 			ldw t6, SEED (zero) ; t6 = N
+			addi t6, t6, 1 ; as we pushed the button one more time we add one to the current seed
 			cmpeqi t7, t6, N_SEEDS ; t7 = 1 if N = N_SEEDS, o/w t7 = 0
 			beq t7, zero, update_state_end; if t7 = 0 we don't change the current state
 		
 			addi t1, zero, RAND	; if t7 = 1 then the new state is RAND
 			br update_state_end
 
-
 		update_state_end:
 			stw t1, CURR_STATE (zero) ; we stock the new current state
 			ret
 
 	; END:update_state
+
 
 
 
