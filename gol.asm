@@ -746,7 +746,7 @@ game_of_life:
 
 
    
-; BEGIN:update_state
+	; BEGIN:update_state
 	update_state:
 		ldw t0, CURR_STATE (zero) ; t0 = current state
 			
@@ -796,8 +796,9 @@ game_of_life:
 			and t7, t7, a0 ; if the LSB is 1 then t7 = 1 o/w t7 = 0
 			beq t7, zero, update_state_end ; if t7 = 0 then the current state won't change
 
-			; if b0 = N_SEEDS the next state is RAND o/w we do not change
+			; if b0 + 1 = N_SEEDS the next state is RAND o/w we do not change
 			ldw t6, SEED (zero) ; t6 = N
+			addi t7, zero, 1 ; t7 = t7 + 1
 			cmpeqi t7, t6, N_SEEDS ; t7 = 1 if N = N_SEEDS, o/w t7 = 0
 			beq t7, zero, update_state_end ; if t7 = 0 we don't change the current state
 		
