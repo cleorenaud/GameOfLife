@@ -1153,113 +1153,72 @@ game_of_life:
 
 
 
-		; BEGIN:update_gsa
+	; BEGIN:update_gsa
 	update_gsa:
+		; we push the current ra to the stack
+		addi sp, sp, -4 
+		stw ra, 0 (sp)
+
 		addi t0, zero, PAUSED
-		ldw t1, PAUSE (zero) ; we load the pause value in t1
-		beq t0, t1, update_gsa_end ; if the game is paused, we should not do anything
-		 
-		ldw t0, GSA_ID (zero) ; we load the id of the current GSA
-		beq t0, zero, update_gsa0 ; we branch if the current GSA is GSA0
+		ldw t1, PAUSE (zero) ; t1 is the current pause step
+		beq t0, t1, update_gsa_end ; if the game is paused this procedure should do nothing
 
-		update_gsa1:
-			addi t0, zero, 0
-			stw t0, GSA_ID (zero) ; we change the GSA_ID
+		
 
-			addi s6, zero, 8 ; we initialize our counter for the y
-			addi t3, zero, 32 ; we increment the counter for the word
-			br update_gsa1_loop_y
+		addi s7, zero, N_GSA_LINES
 
-		update_gsa1_loop_x:
-			addi s7, s7, -1 ; we decrement our counter for the x
+		update_gsa_y_loop: 
+			addi s7, s7, -1 ; we decrement our counter
+			add a0, s7, zero ; the parameter of get_gsa
+			call get_gsa
 
-			add a0, s7, zero ; the x coordinate of the cell
+			addi s6, zero, N_GSA_COLUMNS
+			addi s5, zero, 0 ; will be used as the line for the gsa
+			br update_gsa_x_loop
 
-			; we push the current ra to the stack
-			addi sp, sp, -4 
-			stw ra, 0 (sp)
+			update_gsa_x_loop_end:
+				; we must change the current gsa id 
+				ldw t0, GSA_ID (zero)
+				xor t0, t0, t0 ; t0 = !t0
+				stw t0, GSA_ID (zero)
+				
+				addi a0, s5, 0 ; parameter: the line
+				addi a1, s7, 0 ; parameter: the y-coordinate 
+				call set_gsa
 
+				; and now we must revert it
+				ldw t0, GSA_ID (zero)
+				xor t0, t0, t0 ; t0 = !t0
+				stw t0, GSA_ID (zero)
+		
+			beq s7, zero, update_gsa_y_loop_end ; if the counter is zero we exit the loop
+			br update_gsa_y_loop ; else we countinue looping
+
+		update_gsa_x_loop:
+			addi s6, s6, -1 ; we decrement our counter
+			addi a0, s6, 0 ; parameter: the x coordinate
+			addi a1, s7, 0 ; parameter: the y coordinate
 			call find_neighbours
-			add a0, v0, zero ; we stock the number of living neighbours in a0
-			add a1, v1, zero ; we stock the state of the current cell
-			call cell_fate 
-
-			; we retrieve the current ra from the stack
-			ldw ra, 0 (sp)
-			addi sp, sp, 4
+			addi a0, v0, 0 ; parameter: the number of living neighbours
+			addi a1, v1, 0 ; parameter: the (x, y) cell state 
+			call cell_fate
+			srl t0, v0, s6 ; we shift the return value 
+			add s5, s6, s5 ; we add the new value 
 			
-			add t5, zero, v0 ; t5 = state of the current cell
-			sll t5, t5, s7 ; we shift the state by the x coordinates
-			add s3, s3, t5 ; we add the state of the current cell to the states of the line
-			
-			beq t2, zero, update_gsa1_loop_y_end ; if the counter is 0 we exit the loop
-			br update_gsa1_loop_x ; otherwise we continue the loop
-			
-		update_gsa1_loop_y:
-			addi s6, s6, -1 ; we decrement our counter for the y
-			addi s5, s5, -4 ; we decrement the counter for the word
-			ldw s4, GSA1 (s5) ; we load the new line of the GSA
-			
-			add a1, s6, zero ; the y coordinate of the cell
-			addi s7, zero, 12 ; we initialize our counter for the x
-			br update_gsa1_loop_x ; we start looping on the x
-			
-			update_gsa1_loop_y_end:
-				stw s3, GSA0 (s5) ; we stock the state of the cells of the line in the next GSA
-				beq s6, zero, update_gsa_end ; if the counter is 0 we exit the loop
-				br update_gsa1_loop_y ; otherwise we continue the loop
-
-
-		update_gsa0:
-			addi t0, zero, 1
-			stw t0, GSA_ID (zero) ; we change the GSA_ID
-
-			addi s6, zero, 8 ; we initialize our counter for the y
-			addi t3, zero, 32 ; we increment the counter for the word
-			br update_gsa0_loop_y
-
-	
-		update_gsa0_loop_x:
-			addi s7, s7, -1 ; we decrement our counter for the x
-
-			add a0, s7, zero ; the x coordinate of the cell
-
-			; we push the current ra to the stack
-			addi sp, sp, -4 
-			stw ra, 0 (sp)
-
-			call find_neighbours
-			add a0, v0, zero ; we stock the number of living neighbours in a0
-			add a1, v1, zero ; we stock the state of the current cell
-			call cell_fate 
-
-			; we retrieve the current ra from the stack
-			ldw ra, 0 (sp)
-			addi sp, sp, 4
-			
-			add t5, zero, v0 ; t5 = state of the current cell
-			sll t5, t5, s7 ; we shift the state by the x coordinates
-			add s3, s3, t5 ; we add the state of the current cell to the states of the line
-			
-			beq t2, zero, update_gsa0_loop_y_end ; if the counter is 0 we exit the loop
-			br update_gsa0_loop_x ; otherwise we continue the loop
-			
-		update_gsa0_loop_y:
-			addi s6, s6, -1 ; we decrement our counter for the y
-			addi s5, s5, -4 ; we decrement the counter for the word
-			ldw s4, GSA0 (s5) ; we load the new line of the GSA
-			
-			add a1, s6, zero ; the y coordinate of the cell
-			addi s7, zero, 12 ; we initialize our counter for the x
-			br update_gsa0_loop_x ; we start looping on the x
-			
-			update_gsa0_loop_y_end:
-				stw s3, GSA1 (s5) ; we stock the state of the cells of the line in the next GSA
-				beq s6, zero, update_gsa_end ; if the counter is 0 we exit the loop
-				br update_gsa0_loop_y ; otherwise we continue the loop
+			beq s6, zero, update_gsa_x_loop_end ; if the counter is 0 we exit the loop
+			br update_gsa_x_loop ; else we continue looping
+		
+		update_gsa_y_loop_end:
+			; we must change the current gsa id 
+			ldw t0, GSA_ID (zero)
+			xor t0, t0, t0 ; t0 = !t0
+			stw t0, GSA_ID (zero)	
 
 		update_gsa_end:
-			ret ; once we are done we can return
+			; we retrieve the current ra from the stack
+			ldw ra, 0 (sp)
+			addi sp, sp, 4
+			ret ; once we are done we return		
 	
 	; END:update_gsa
 
