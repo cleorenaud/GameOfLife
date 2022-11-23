@@ -1383,33 +1383,17 @@ game_of_life:
 		addi t0, zero, 1 ; t0 = 1
 		stw t0, CURR_STEP (zero) ; we set the current step to 1
 
-		stw zero, SEED (zero) ; we select the seed 0
+		addi t1, zero, -1
+		stw t1, SEED (zero) ; we store -1, when increment_seed is called we will get seed 0
 
 		stw zero, GSA_ID (zero) ; GSA ID is 0
-
-		; the GSA 0 is initialized to the seed 0
-		; we load the seed 0 in our current GSA
-
-		addi t7, zero, 8 ; t7 = 8, the number of time we will run the loop
-		addi t6, zero, 0 ; t6 = 6, we will increment it by 4 at each iteration of the loop
-		addi a1, zero, 0 ; a1 = 0, we will increment it at each iteration of the loop
-
-		reset_game_seed_loop:
-			beq t7, zero, reset_game_end ; if t7 = 0 then we don't have to do the loop anymore
-			
-			ldw a0, seed0 (t6)
-			call set_gsa
-
-			addi t6, t6, 4 ; t6 = t6 + 4
-			addi t7, t7, -1 ; t7 = t7 - 1
-			addi a1, a1, 1 ; a1 = a1 + 1
-			br reset_game_seed_loop ; we re-iterate
-
-		reset_game_end:
 
 		; we push the current ra to the stack
 		addi sp, sp, -4 
 		stw ra, 0 (sp)
+		; the GSA 0 is initialized to the seed 0
+		; we load the seed 0 in our current GSA
+		call increment_seed
 		call draw_gsa ; we display the GSA on the LED
 		; we retrieve the current ra from the stack
 		ldw ra, 0 (sp)
@@ -1423,6 +1407,7 @@ game_of_life:
 		
 		ret ; once we are done we return
 	; END:reset_game
+
 
 
 
