@@ -255,7 +255,7 @@ main:
 	; END:get_gsa
 
 
-	; BEGIN set_gsa
+	; BEGIN:set_gsa
 	set_gsa:
 		ldw t0, GSA_ID (zero) ; We extract the value determining which is the current gsa
 		;we will loop over a1 to be able to add +0, +4, +8... to index the GSA correctly
@@ -281,7 +281,7 @@ main:
 			stw a0, GSA0 (t1) ; we store the y line in its position in the current gsa
 		ret
 
-	; END set_gsa
+	; END:set_gsa
 
     ; BEGIN:draw_gsa
 	draw_gsa:
@@ -1075,6 +1075,23 @@ main:
 			addi v0, zero, 1 ;else lives
 			ret
 	; END:cell_fate
+
+
+
+
+	; 3.7. Inputs to the game
+
+	; BEGIN:get_input
+	get_input:
+		ldw t0, BUTTONS+4 (zero) ; we load the falling edge detection
+		addi v0, zero, t0 ; we return the value of the edgecapture register
+		stw zero, BUTTONS+4 (zero) ; we clear the edgecapture register
+
+		ret ; once it's done we can return
+
+	; END:get_input
+
+
 
 
 	; BEGIN:reset_game
