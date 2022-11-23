@@ -35,6 +35,14 @@ game_of_life:
 	addi sp, zero, CUSTOM_VAR_END
 
 
+	;test mask
+	addi t0, zero, 4 ;change this number to get the desired mask
+	stw t0, SEED (zero)
+	call random_gsa
+	call mask
+	call draw_gsa
+	call wait
+
 	;tests neighbours
 	;call random_gsa
 	;addi a0, zero, 11
@@ -1260,9 +1268,75 @@ game_of_life:
 
 	; BEGIN:mask
 	mask:
+		;we apply corresponding mask to the gsa
+		add t0, zero, zero
+		addi t1, zero, 1
+		addi t2, zero, 2
+		addi t3, zero, 3
+		addi t4, zero, 4
+
+		addi s5, zero, N_GSA_LINES
+		add s1, zero, zero ;counter
+
+		ldw t5, SEED (zero)
+
+		beq t5, t0, apply_mask_0
+		beq t5, t1, apply_mask_1
+		beq t5, t2, apply_mask_2
+		beq t5, t3, apply_mask_3
+		beq t5, t4, apply_mask_4
+
+		ret
+		
+		apply_mask_0:
+			ldw s0, MASKS (zero)
+			jmpi apply_masks
+
+		apply_mask_1:
+			ldw s0, MASKS+4 (zero)
+			jmpi apply_masks
+
+		apply_mask_2:
+			ldw s0, MASKS+8 (zero)
+			jmpi apply_masks
+
+		apply_mask_3:
+			ldw s0, MASKS+12 (zero)
+			jmpi apply_masks
+
+		apply_mask_4:
+			ldw s0, MASKS+16 (zero)
+			jmpi apply_masks
+		
+		apply_masks:
+		add a0, s1, zero
+
+		addi sp, sp, -4
+		stw ra, 0(sp)
+		call get_gsa
+		ldw ra, 0(sp)
+		addi sp, sp, 4
+
+		ldw t0, 0 (s0)
+
+		and a0, t0, v0
+		add a1, s1, zero
+		
+		addi sp, sp, -4
+		stw ra, 0(sp)
+		call set_gsa
+		ldw ra, 0(sp)
+		addi sp, sp, 4
+
+		addi s0, s0, 4
+		addi s1, s1, 1
+
+		bltu s1, s5, apply_masks
+
 		ret
 
 	; END:mask
+
 
 
 
