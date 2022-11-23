@@ -1013,6 +1013,24 @@ game_of_life:
 
 
 
+	; BEGIN:update_gsa
+	update_gsa:
+		ret
+	
+	; END:update_gsa
+
+
+
+
+	; BEGIN:mask
+	mask:
+		ret
+
+	; END:mask
+
+
+
+
 	; 3.7. Inputs to the game
 
 	; BEGIN:get_input
