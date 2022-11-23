@@ -867,7 +867,7 @@ main:
 
 	; BEGIN:select_action
 	select_action:
-		stw t0, CURR_STATE (zero) ; based on the current state, each button doesn't have the same effect
+		ldw t0, CURR_STATE (zero) ; based on the current state, each button doesn't have the same effect
 		
 		select_action_state_chooser:
 			addi t1, zero, INIT
@@ -881,6 +881,7 @@ main:
 	
 		select_action_init:
 			addi t1, zero, 1 ; t1 will be a mask to check whether a button is pressed
+			add s0, zero, a0 ; s0 = a0, will be used as parameters for update_state
 			add t0, zero, a0 ; t0 = a0
 		
 			s_a_init_b0:
@@ -891,10 +892,16 @@ main:
 				addi sp, sp, -4 
 				stw ra, 0 (sp)
 				call increment_seed ; if b0 is pressed we go through the predefined seeds
+				call update_state
 				; we retrieve the current ra from the stack
 				ldw ra, 0 (sp)
 				addi sp, sp, 4
 
+				; we check if the current state changed
+				addi t7, zero, RAND
+				ldw t6, CURR_STATE (zero)
+				beq t7, t6, select_action ; if the current state changed to RAND we re-call select_action
+				
 			s_a_init_b1:
 				srli t0, t0, 1 ; we shift a0, this way its LSB is b1
 				; whether b1 is pressed or not, we just have to update the state
@@ -938,7 +945,14 @@ main:
 		
 			s_a_rand_b0:
 				and t2, t1, t0 ; t2 = 1 if b0 is pressed. t2 = 0 o/w
-				; whether b0 is pressed or not, we just have to update the state
+				beq t2, zero, s_a_rand_b1 ; if b0 isn't pressed we check the other buttons
+				; we push the current ra to the stack
+				addi sp, sp, -4 
+				stw ra, 0 (sp)
+				call increment_seed ; if b0 is pressed we increment the seed
+				; we retrieve the current ra from the stack
+				ldw ra, 0 (sp)
+				addi sp, sp, 4
 
 			s_a_rand_b1:
 				srli t0, t0, 1 ; we shift a0, this way its LSB is b1
@@ -1042,6 +1056,7 @@ main:
 			; we push the current ra to the stack
 			addi sp, sp, -4 
 			stw ra, 0 (sp)
+			add a0, zero, s0
 			call update_state ; we also call update state
 			; we retrieve the current ra from the stack
 			ldw ra, 0 (sp)
@@ -1147,7 +1162,7 @@ main:
 
 
 
-	
+
 	; BEGIN:reset_game
 	reset_game:
 		ret ; for now, reset_game do nothing, only used so that call to reset_game compute
