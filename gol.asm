@@ -865,7 +865,7 @@ main:
 
 
 
-	; BEGIN:select_action
+		; BEGIN:select_action
 	select_action:
 		ldw t0, CURR_STATE (zero) ; based on the current state, each button doesn't have the same effect
 		
@@ -900,7 +900,15 @@ main:
 				; we check if the current state changed
 				addi t7, zero, RAND
 				ldw t6, CURR_STATE (zero)
-				beq t7, t6, select_action ; if the current state changed to RAND we re-call select_action
+				bne t7, t6, s_a_init_b1 ; if the current state has not changed we check the other buttons
+				
+				; we push the current ra to the stack
+				addi sp, sp, -4 
+				stw ra, 0 (sp)
+				call increment_seed ; if the current state is RAND we must re-call increment_seed
+				; we retrieve the current ra from the stack
+				ldw ra, 0 (sp)
+				addi sp, sp, 4
 				
 			s_a_init_b1:
 				srli t0, t0, 1 ; we shift a0, this way its LSB is b1
@@ -1065,6 +1073,7 @@ main:
 			ret
 	
 	; END:select_action
+
 
 
 	; BEGIN:cell_fate
