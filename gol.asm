@@ -1424,16 +1424,6 @@ game_of_life:
 		; the GSA 0 is initialized to the seed 0
 		; we load the seed 0 in our current GSA
 
-
-		; we push the current ra to the stack
-		addi sp, sp, -4 
-		stw ra, 0 (sp)
-		
-
-		; we retrieve the current ra from the stack
-		ldw ra, 0 (sp)
-		addi sp, sp, 4
-
 		addi t7, zero, 8 ; t7 = 8, the number of time we will run the loop
 		addi t6, zero, 0 ; t6 = 6, we will increment it by 4 at each iteration of the loop
 		addi a1, zero, 0 ; a1 = 0, we will increment it at each iteration of the loop
@@ -1450,6 +1440,15 @@ game_of_life:
 			br reset_game_seed_loop ; we re-iterate
 
 		reset_game_end:
+
+		; we push the current ra to the stack
+		addi sp, sp, -4 
+		stw ra, 0 (sp)
+		call draw_gsa ; we display the GSA on the LED
+		; we retrieve the current ra from the stack
+		ldw ra, 0 (sp)
+		addi sp, sp, 4
+
 		addi t0, zero, PAUSED ; t0 = 0
 		stw t0, PAUSE (zero) ;  we set the game to paused
 
