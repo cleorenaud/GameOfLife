@@ -1172,10 +1172,26 @@ main:
 
 
 
+	; 3.9. Reset
+
 	; BEGIN:reset_game
 	reset_game:
-		ret ; for now, reset_game do nothing, only used so that call to reset_game compute
+		addi t0, zero, 1 ; t0 = 1
+		stw t0, CURR_STEP (zero) ; we set the current step to 1
 
+		stw zero, SEED (zero) ; we select the seed 0
+
+		; the game state 0 is initialized to the seed 0
+
+		stw zero, GSA_ID (zero) ; GSA ID is 0
+
+		addi t0, zero, PAUSED ; t0 = 0
+		stw t0, PAUSE (zero) ;  we set the game to paused
+
+		addi t0, zero, MIN_SPEED ; t0 = 1
+		stw t0, SPEED (zero) ; we set the game speed to 1 (MIN_SPEED)
+		
+		ret ; once we are done we return
 	; END:reset_game
 
 
