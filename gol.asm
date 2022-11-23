@@ -34,6 +34,15 @@ game_of_life:
 	;set stack pointer at adequate value
 	addi sp, zero, CUSTOM_VAR_END
 
+
+	;tests neighbours
+	;call random_gsa
+	;addi a0, zero, 11
+	;addi a1, zero, 7
+	;call find_neighbours
+	;v1 =1, v0 = 8
+	;call wait
+
 	call reset_game 
 	call get_input
 	add s0, v0, zero ; we stock the return value of get_input in s0
@@ -1009,6 +1018,131 @@ game_of_life:
 			addi v0, zero, 1 ;else lives
 			ret
 	; END:cell_fate
+
+
+	; BEGIN:find_neighbours
+	find_neighbours:
+		add s7, zero, zero ;neighbours counter
+		add s0, zero, a0 ;x coordinate
+		add s1, zero, a1 ;y coordinate
+		addi s5, zero, N_GSA_LINES
+		addi s6, zero, N_GSA_COLUMNS
+
+		addi sp, sp, -4
+		stw ra, 0(sp)
+
+		call above_neighbours
+		call computing_neighbours
+		call line_neighbours
+		call computing_neighbours
+		call under_neighbours
+		call computing_neighbours
+
+		ldw ra, 0(sp)
+		addi sp, sp, 4
+
+		add v0, zero, s7
+		
+		ret
+		
+		above_neighbours:
+		beq s1, zero, last_line_neighbours
+		addi a0, s1, -1
+		jmpi get_the_above_gsa
+
+		last_line_neighbours:
+			addi a0, s5, -1
+
+		get_the_above_gsa:
+		addi sp, sp, -4
+		stw ra, 0(sp)
+		call get_gsa
+		ldw ra, 0(sp)
+		addi sp, sp, 4 ;now v0 contains the value of the line
+		add s2, zero, v0
+		ret
+
+		line_neighbours:
+		add a0, zero, s1
+
+		addi sp, sp, -4
+		stw ra, 0(sp)
+		call get_gsa
+		ldw ra, 0(sp)
+		addi sp, sp, 4 ;now v0 contains the value of the line
+		add s2, zero, v0
+		ret
+
+		under_neighbours:
+		addi t0, zero, N_GSA_LINES
+		addi t0, t0, -1
+		beq s1, t0, first_line_neighbours
+		addi a0, s1, 1
+		jmpi get_the_under_gsa
+
+		first_line_neighbours:
+			add a0, zero, zero
+
+		get_the_under_gsa:
+		addi sp, sp, -4
+		stw ra, 0(sp)
+		call get_gsa
+		ldw ra, 0(sp)
+		addi sp, sp, 4 ;now v0 contains the value of the line
+		add s2, zero, v0
+		ret
+
+
+		computing_neighbours:
+		bne s0, zero, not_most_right
+		addi t0, s6, -1
+		srl s3, s2, t0
+		slli s2, s2, 1
+		or s2, s2, s3
+		jmpi mask_minus_one ;is already in second to last position
+		not_most_right:
+
+		addi t0, s6, -1
+		bne s0, t0, not_most_left
+		addi t0, t0, -1
+		srl s3, s2, t0
+		andi t1, s2, 1
+		slli t1, t1, 2
+		or s2, s3, t1
+		jmpi mask_minus_one
+		not_most_left:
+		
+		addi t0, s0, -1
+		shifting:
+		srl s2, s2, t0 ;we make sure it is in second to last position
+		;we apply masks
+		mask_minus_one:
+			addi t0, zero, 1
+			and s4, t0, s2
+			add s7, s7, s4
+
+		mask_zero:
+			addi t0, zero, 2
+			beq s1, a0, state_of_cell
+			;if not, we are either at y-1 or y+1
+			and s4, t0, s2
+			srli s4, s4, 1
+			add s7, s7, s4
+			jmpi mask_plus_one
+
+			state_of_cell:
+				and v1, t0, s2
+				srli v1, v1, 1
+
+		mask_plus_one:
+			addi t0, zero, 4
+			and s4, t0, s2
+			srli s4, s4, 2
+			add s7, s7, s4
+		
+		ret
+
+	; END:find_neighbours
 
 
 
