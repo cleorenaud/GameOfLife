@@ -29,38 +29,37 @@
     .equ RUNNING, 0x01
 
 main:
-
+; algorithm to run the game of life
+game_of_life:
 	;set stack pointer at adequate value
 	addi sp, zero, CUSTOM_VAR_END
 
-	call clear_leds
-	addi a0, zero, 3
-	addi a1, zero, 0
-	call set_gsa
-	addi a0, zero, 67
-	addi a1, zero, 1
-	call set_gsa
-	addi a0, zero, 128
-	addi a1, zero, 2
-	call set_gsa
-	addi a0, zero, 224
-	addi a1, zero, 3
-	call set_gsa
-	addi a0, zero, 0
-	addi a1, zero, 4
-	call set_gsa
-	addi a0, zero, 2
-	addi a1, zero, 5
-	call set_gsa
-	addi a0, zero, 4
-	addi a1, zero, 6
-	call set_gsa
-	addi a0, zero, 7
-	addi a1, zero, 7
-	call set_gsa
+	call reset_game 
+	call get_input
+	add s0, v0, zero ; we stock the return value of get_input in s0
 
-	call draw_gsa
-	;We should get the same leds lighting up as in the 3.3.1!!!!
+	game_of_life_loop:
+		bne s1, zero, game_of_life ; if done != 0 we exit the loop
+
+		add a0, v0, zero ; we push the input value of select_action
+		call select_action 
+
+		add a0, v0, zero ; we push the input value of update_state
+		call update_state
+
+		call update_gsa
+		call mask
+		call draw_gsa
+		call wait
+
+		call decrement_step
+		add s1, zero, v0 ; we stock the return value of decrement_step in s1
+
+		call get_input
+		add s0, zero, v0
+		
+		br game_of_life_loop
+
 
 
 
@@ -794,7 +793,7 @@ main:
 
 
 
-	; BEGIN:select_action
+		; BEGIN:select_action
 	select_action:
 		ldw t0, CURR_STATE (zero) ; based on the current state, each button doesn't have the same effect
 		
@@ -821,7 +820,6 @@ main:
 				addi sp, sp, -4 
 				stw ra, 0 (sp)
 				call increment_seed ; if b0 is pressed we go through the predefined seeds
-				call update_state
 				; we retrieve the current ra from the stack
 				ldw ra, 0 (sp)
 				addi sp, sp, 4
@@ -973,13 +971,6 @@ main:
 				srli t0, t0, 1 ; we shift a0, this way its LSB is b3
 				and t2, t1, t0 ; t2 = 1 if b3 is pressed. t2 = 0 o/w0
 				beq t2, zero, s_a_run_b4 ; if b3 isn't pressed we check the other buttons
-				; we push the current ra to the stack
-				addi sp, sp, -4 
-				stw ra, 0 (sp)
-				call reset_game ; if b3 is pressed we reset the game
-				; we retrieve the current ra from the stack
-				ldw ra, 0 (sp)
-				addi sp, sp, 4
 
 			s_a_run_b4:
 				srli t0, t0, 1 ; we shift a0, this way its LSB is b4
@@ -990,19 +981,9 @@ main:
 				; TO DO
 
 		select_action_end:
-			; we push the current ra to the stack
-			addi sp, sp, -4 
-			stw ra, 0 (sp)
-			add a0, zero, s0
-			call update_state ; we also call update state
-			; we retrieve the current ra from the stack
-			ldw ra, 0 (sp)
-			addi sp, sp, 4
-			
 			ret
 	
 	; END:select_action
-
 
 
 	; BEGIN:cell_fate
@@ -1037,7 +1018,7 @@ main:
 	; BEGIN:get_input
 	get_input:
 		ldw t0, BUTTONS+4 (zero) ; we load the falling edge detection
-		addi v0, zero, t0 ; we return the value of the edgecapture register
+		add v0, zero, t0 ; we return the value of the edgecapture register
 		stw zero, BUTTONS+4 (zero) ; we clear the edgecapture register
 
 		ret ; once it's done we can return
@@ -1103,7 +1084,7 @@ main:
 
 	; 3.9. Reset
 
-		; BEGIN:reset_game
+	; BEGIN:reset_game
 	reset_game:
 		addi t0, zero, 1 ; t0 = 1
 		stw t0, CURR_STEP (zero) ; we set the current step to 1
