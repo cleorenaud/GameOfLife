@@ -1349,20 +1349,32 @@ game_of_life:
 
 		decrement_step_display:
 			; we display the new number of steps on the 7-SEG display
-			addi t1, zero, 1 ; we create a mask
+			ldw t0, CURR_STEP (zero)
 
-			and t2, t0, t1 ; we extract the value of the units
-			ldw t3, font_data (t2) ; we load the value corresponding to the units
+			; we extract the value of the units
+			slli t1, t0, 28
+			srli t1, t1, 28
+			; we must multiply t1 by 4
+			add t1, t1, t1 
+			add t1, t1, t1
+			ldw t3, font_data (t1) ; we load the value corresponding to the units
 			stw t3, SEVEN_SEGS (zero) ; we store the value for the SEG[3]
 
-			srli t0, t0, 1 ; we shift t0 so its LSB is the tens
-			and t2, t0, t1 ; we extract the value of the tens
-			ldw t3, font_data (t2) ; we load the value corresponding to the tens
+			; we extract the value of the tens
+			slli t1, t0, 24
+			srli t1, t1, 28
+			; we must multiply t1 by 4
+			add t1, t1, t1 
+			add t1, t1, t1
+			ldw t3, font_data (t1) ; we load the value corresponding to the tens
 			stw t3, SEVEN_SEGS+4 (zero) ; we store the value for the SEG[2]
 
-			srli t0, t0, 1 ; we shift t0 so its LSB is the hundreds
-			and t2, t0, t1 ; we extract the value of the hundreds
-			ldw t3, font_data (t2) ; we load the value corresponding to the hundreds
+			; we extract the value of the hundreds
+			srli t1, t0, 8
+			; we must multiply t1 by 4
+			add t1, t1, t1 
+			add t1, t1, t1
+			ldw t3, font_data (t1) ; we load the value corresponding to the hundreds
 			stw t3, SEVEN_SEGS+8 (zero) ; we store the value for the SEG[1]
 
 			ldw t3, font_data (zero) ; we load the value corresponding to zero
