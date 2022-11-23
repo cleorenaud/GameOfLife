@@ -394,7 +394,19 @@ game_of_life:
 					beq t0, t4, load_seed_1
 					beq t0, t5, load_seed_2
 					beq t0, t6, load_seed_3
-					ret ; if we incremented and it is =4, we exit
+
+					rand_seed:
+					addi t0, zero, N_SEEDS
+					stw t0, SEED (zero)
+
+
+					addi sp, sp, -4
+					stw ra, 0(sp)
+					call random_gsa
+					ldw ra, 0(sp)
+					addi sp, sp, 4
+				
+				ret
 	
 					load_seed_0:
 						;0
@@ -721,22 +733,8 @@ game_of_life:
 						addi sp, sp, 4
 
 					ret
-				
-				rand_seed:
-					addi t0, zero, N_SEEDS
-					stw t0, SEED (zero)
-
-
-					addi sp, sp, -4
-					stw ra, 0(sp)
-					call random_gsa
-					ldw ra, 0(sp)
-					addi sp, sp, 4
-				
-				ret
 	
 	;END:increment_seed
-
 
 
    
