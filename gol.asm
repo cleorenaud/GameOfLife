@@ -1094,6 +1094,60 @@ main:
 
 
 
+	; 3.8. Game step handling
+	
+	; BEGIN:decrement_step
+	decrement_step:
+		ldw t0, CURR_STATE (zero) ; we load the current state
+		addi t1, zero, RUN ; t1 = 2 (RUN state)
+
+		bne t0, t1, decrement_step_display ; if the current state is not RUN we branch
+
+		ldw t0, CURR_STEP (zero) ; we load the current step
+	
+		beq t0, zero, decrement_step_zero ; if the current step is zero we branch
+
+		addi t0, t0, -1 ; if the current step is not zero we decrement the number of steps
+		stw t0, CURR_STEP (zero) ; then we store the new value
+	
+		br decrement_step_display ; now we will update the 7-SEG display
+
+		decrement_step_end:
+			ret ; once we are done we can return
+
+		decrement_step_zero:
+			addi v0, zero, 1 ; if the current step is zero we return one
+			br decrement_step_end
+
+		decrement_step_display:
+			; we display the new number of steps on the 7-SEG display
+			addi t1, zero, 1 ; we create a mask
+
+			and t2, t0, t1 ; we extract the value of the units
+			ldw t3, font_data (t2) ; we load the value corresponding to the units
+			stw t3, SEVEN_SEGS (zero) ; we store the value for the SEG[3]
+
+			srli t0, t0, 1 ; we shift t0 so its LSB is the tens
+			and t2, t0, t1 ; we extract the value of the tens
+			ldw t3, font_data (t2) ; we load the value corresponding to the tens
+			stw t3, SEVEN_SEGS+4 (zero) ; we store the value for the SEG[2]
+
+			srli t0, t0, 1 ; we shift t0 so its LSB is the hundreds
+			and t2, t0, t1 ; we extract the value of the hundreds
+			ldw t3, font_data (t2) ; we load the value corresponding to the hundreds
+			stw t3, SEVEN_SEGS+8 (zero) ; we store the value for the SEG[1]
+
+			ldw t3, font_data (zero) ; we load the value corresponding to zero
+			stw t3, SEVEN_SEGS+12 (zero) ; SEG[0] is always zero
+
+			addi v0, zero, 0 ; if the current step isn't zero we return zero
+			br decrement_step_end
+		
+	; END:decrement_step
+
+
+
+	
 	; BEGIN:reset_game
 	reset_game:
 		ret ; for now, reset_game do nothing, only used so that call to reset_game compute
