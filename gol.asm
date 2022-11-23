@@ -746,7 +746,7 @@ game_of_life:
 
 
    
-	; BEGIN:update_state
+; BEGIN:update_state
 	update_state:
 		ldw t0, CURR_STATE (zero) ; t0 = current state
 			
@@ -768,12 +768,18 @@ game_of_life:
 			addi t1, zero, RAND
 			beq t0, t1, update_state_end ; all cases for when the current state is RAND are already covered
 
-		update_state_run: ; when the current state is RUN
+		update_state_run: ; when the current state is RUN		
+			; check the number of steps left
+			ldw t0, CURR_STEP (zero)
+			beq t0, zero, run_to_init ; if current step = 0 we branch
+
+			; check value of the button 3
 			addi t7, zero, 1 ; we create a mask
 			srli t6, a0, 3 ; the LSB of t6 is the value of b3
 			and t7, t7, t6 ; if the LSB is 1 then t7 = 1 o/w t7 = 0
 			beq t7, zero, update_state_end ; if t7 = 0 then the current state won't change
 			
+			run_to_init:
 			addi t1, zero, INIT ; if t7 = 1 then the new state is INIT
 			; we push the current ra to the stack
 			addi sp, sp, -4 
