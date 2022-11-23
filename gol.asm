@@ -33,108 +33,38 @@ main:
 	;set stack pointer at adequate value
 	addi sp, zero, CUSTOM_VAR_END
 
-
-
-;tests
-	; Test update_state
-	;test update state (init+b1=run)
-	stw zero, CURR_STATE (zero)
-	addi a0, zero, 0b00010
-	call update_state
-
-	;test update state (init+b0=init if b0<N)
-	stw zero, CURR_STATE (zero)
-	addi t0, zero, 2
-	stw t0 , SEED (zero)
-	addi a0, zero, 0b00001
-	call update_state
-
-	;test update state (init+b0=rand if b0=N)
-	addi t0, zero, 3
-	stw t0 , SEED (zero)
-	addi a0, zero, 0b0001
-	call update_state
-
-	;test update state (run+b3=init)
-	addi t0, zero, 2
-	stw t0, CURR_STATE (zero)
-	addi a0, zero, 0b01000
-	call update_state
-
-	;test update state (run+!b3=run)
-	addi t0, zero, 2
-	stw t0, CURR_STATE (zero)
-	addi a0, zero, 0b00001
-	call update_state
-
-	;test update state (rand+b1=run)
-	addi t0, zero, 1
-	stw t0, CURR_STATE (zero)
-	addi a0, zero, 0b00010
-	call update_state
-
-	;test update state (rand+!b1=rand)
-	addi t0, zero, 1
-	stw t0, CURR_STATE (zero)
-	addi a0, zero, 0b00001
-	call update_state
-
-	;test update_state end
-
-
-	;tests cell_fate
-	addi a0, zero, 4
-	addi a1, zero, 1
-	call cell_fate
-	call wait
-
-	;tests increment_seed, should get rand mode 
-	addi t0, zero, 1
-	stw t0, CURR_STATE (zero)
-	call increment_seed
-	call draw_gsa
-	call wait
-
-
 	call clear_leds
-
+	addi a0, zero, 3
+	addi a1, zero, 0
+	call set_gsa
 	addi a0, zero, 67
 	addi a1, zero, 1
 	call set_gsa
-	
+	addi a0, zero, 128
+	addi a1, zero, 2
+	call set_gsa
+	addi a0, zero, 224
+	addi a1, zero, 3
+	call set_gsa
+	addi a0, zero, 0
+	addi a1, zero, 4
+	call set_gsa
+	addi a0, zero, 2
+	addi a1, zero, 5
+	call set_gsa
+	addi a0, zero, 4
+	addi a1, zero, 6
+	call set_gsa
+	addi a0, zero, 7
+	addi a1, zero, 7
+	call set_gsa
+
 	call draw_gsa
-	call wait
 	;We should get the same leds lighting up as in the 3.3.1!!!!
 
 
-	;tests for random
-	;call clear_leds
-	;call random_gsa
-	;call draw_gsa
-	;call wait
 
-	;tests for speed
-	addi t0, zero, 3
-	stw t0, SPEED (zero)
-	call change_speed
-	call change_speed
-	addi a0, zero, 1
-	call change_speed
-	call change_speed
-	ldw t0, SPEED (zero)
-
-	;cas limites
-	addi t0, zero, 10
-	stw t0, SPEED (zero)
-	call change_speed
-
-	addi t0, zero, 1
-	
-	stw t0, SPEED (zero)
-	call change_speed
-
-	
-    ; BEGIN:clear_leds
+ 	; BEGIN:clear_leds
     clear_leds:
         stw zero, LEDS (zero)
 		stw zero, LEDS+4 (zero)
@@ -142,9 +72,9 @@ main:
         ret
     ; END:clear_leds
 
+
 	
-	
-	
+
 	; BEGIN:set_pixel
     set_pixel:
 
@@ -848,9 +778,8 @@ main:
 
 			; if b0 = N_SEEDS the next state is RAND o/w we do not change
 			ldw t6, SEED (zero) ; t6 = N
-			addi t6, t6, 1 ; as we pushed the button one more time we add one to the current seed
 			cmpeqi t7, t6, N_SEEDS ; t7 = 1 if N = N_SEEDS, o/w t7 = 0
-			beq t7, zero, update_state_end; if t7 = 0 we don't change the current state
+			beq t7, zero, update_state_end ; if t7 = 0 we don't change the current state
 		
 			addi t1, zero, RAND	; if t7 = 1 then the new state is RAND
 			br update_state_end
@@ -865,7 +794,7 @@ main:
 
 
 
-		; BEGIN:select_action
+	; BEGIN:select_action
 	select_action:
 		ldw t0, CURR_STATE (zero) ; based on the current state, each button doesn't have the same effect
 		
@@ -1174,7 +1103,7 @@ main:
 
 	; 3.9. Reset
 
-	; BEGIN:reset_game
+		; BEGIN:reset_game
 	reset_game:
 		addi t0, zero, 1 ; t0 = 1
 		stw t0, CURR_STEP (zero) ; we set the current step to 1
@@ -1200,7 +1129,7 @@ main:
 		addi t6, zero, 0 ; t6 = 6, we will increment it by 4 at each iteration of the loop
 		addi a1, zero, 0 ; a1 = 0, we will increment it at each iteration of the loop
 
-		set_seed_loop:
+		reset_game_seed_loop:
 			beq t7, zero, reset_game_end ; if t7 = 0 then we don't have to do the loop anymore
 			
 			ldw a0, seed0 (t6)
@@ -1209,7 +1138,7 @@ main:
 			addi t6, t6, 4 ; t6 = t6 + 4
 			addi t7, t7, -1 ; t7 = t7 - 1
 			addi a1, a1, 1 ; a1 = a1 + 1
-			br set_seed_loop ; we re-iterate
+			br reset_game_seed_loop ; we re-iterate
 
 		reset_game_end:
 		addi t0, zero, PAUSED ; t0 = 0
