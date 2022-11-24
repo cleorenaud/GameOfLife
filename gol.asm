@@ -138,6 +138,9 @@ game_of_life:
 			
     ; END:set_pixel
 	
+
+
+
 	; BEGIN:wait
     wait:
 		addi t0, zero, 1 ; we put our temporary register to 1
@@ -151,6 +154,8 @@ game_of_life:
 		wait_exit:
         	ret
     ; END:wait
+
+
 
 
 	; BEGIN:get_gsa
@@ -182,6 +187,8 @@ game_of_life:
 	; END:get_gsa
 
 
+
+
 	; BEGIN:set_gsa
 	set_gsa:
 		ldw t0, GSA_ID (zero) ; We extract the value determining which is the current gsa
@@ -209,6 +216,9 @@ game_of_life:
 			ret
 
 	; END:set_gsa
+
+
+
 
     ; BEGIN:draw_gsa
 	draw_gsa:
@@ -303,6 +313,8 @@ game_of_life:
 		ret
 			
 	; END:draw_gsa
+
+
 
 
 	; BEGIN:random_gsa
@@ -441,6 +453,25 @@ game_of_life:
 
 	; BEGIN:increment_seed
 	increment_seed:
+		;making sure s's remain unchanged
+		addi sp, sp, -4
+		stw s0, 0(sp)
+		addi sp, sp, -4
+		stw s1, 0(sp)
+		addi sp, sp, -4
+		stw s2, 0(sp)
+		addi sp, sp, -4
+		stw s3, 0(sp)
+		addi sp, sp, -4
+		stw s4, 0(sp)
+		addi sp, sp, -4
+		stw s5, 0(sp)
+		addi sp, sp, -4
+		stw s6, 0(sp)
+		addi sp, sp, -4
+		stw s7, 0(sp)
+		;making sure s's remain unchanged
+
 		ldw t0, SEED (zero) ; t0 is the current seed number
 	
 		ldw t1, CURR_STATE (zero) ; t1 is the current state 
@@ -450,6 +481,8 @@ game_of_life:
 		init_seed:
 			addi t0, t0, 1 ; we increment the seed number 
 			stw t0, SEED (zero) ; and we store the new seed number
+			addi t1, zero, N_SEEDS ; t1 = N_SEEDS
+			beq t0, t1, rand_seed ; if the N = N_SEEDS we must load a random seed
 
 			; we determine which seed we must load
 			addi t3, zero, 0 ; t3 = 0
@@ -473,7 +506,7 @@ game_of_life:
 			ldw ra, 0(sp)
 			addi sp, sp, 4
 				
-			ret
+			br increment_seed_end
 	
 		
 		; Procedure to load the seed 0
@@ -483,7 +516,7 @@ game_of_life:
 			addi s5, zero, 0 ; s5 = 0, we will increment it at each iteration of the loop
 
 		load_seed0_loop:
-			beq s7, zero, load_seed0_end ; if s7 = 0 then we don't have to do the loop anymore
+			beq s7, zero, increment_seed_end ; if s7 = 0 then we don't have to do the loop anymore
 			
 			ldw a0, seed0 (s6)
 			; we push the current ra to the stack
@@ -499,9 +532,6 @@ game_of_life:
 			addi s5, s5, 1 ; s5 = s5 + 1
 			addi a1, s5, 0 ; a1 = s5
 			br load_seed0_loop ; we re-iterate
-
-		load_seed0_end:
-			ret 
 		; End of procedure to load the seed 0
 
 
@@ -512,7 +542,7 @@ game_of_life:
 			addi s5, zero, 0 ; s5 = 0, we will increment it at each iteration of the loop
 
 		load_seed1_loop:
-			beq s7, zero, load_seed1_end ; if s7 = 0 then we don't have to do the loop anymore
+			beq s7, zero, increment_seed_end ; if s7 = 0 then we don't have to do the loop anymore
 			
 			ldw a0, seed1 (s6)
 			; we push the current ra to the stack
@@ -528,9 +558,6 @@ game_of_life:
 			addi s5, s5, 1 ; s5 = s5 + 1
 			addi a1, s5, 0 ; a1 = s5
 			br load_seed1_loop ; we re-iterate
-
-		load_seed1_end:
-			ret 
 		; End of procedure to load the seed 1
 	
 
@@ -541,7 +568,7 @@ game_of_life:
 			addi s5, zero, 0 ; s5 = 0, we will increment it at each iteration of the loop
 
 		load_seed2_loop:
-			beq s7, zero, load_seed2_end ; if s7 = 0 then we don't have to do the loop anymore
+			beq s7, zero, increment_seed_end ; if s7 = 0 then we don't have to do the loop anymore
 			
 			ldw a0, seed2 (s6)
 			; we push the current ra to the stack
@@ -557,9 +584,6 @@ game_of_life:
 			addi s5, s5, 1 ; s5 = s5 + 1
 			addi a1, s5, 0 ; a1 = s5
 			br load_seed2_loop ; we re-iterate
-
-		load_seed2_end:
-			ret
 		; End of the procedure to load the seed 2
 
 
@@ -570,7 +594,7 @@ game_of_life:
 			addi s5, zero, 0 ; s5 = 0, we will increment it at each iteration of the loop
 
 		load_seed3_loop:
-			beq s7, zero, load_seed3_end ; if s7 = 0 then we don't have to do the loop anymore
+			beq s7, zero, increment_seed_end ; if s7 = 0 then we don't have to do the loop anymore
 			
 			ldw a0, seed3 (s6)
 			; we push the current ra to the stack
@@ -586,52 +610,90 @@ game_of_life:
 			addi s5, s5, 1 ; s5 = s5 + 1
 			addi a1, s5, 0 ; a1 = s5
 			br load_seed3_loop ; we re-iterate
-
-		load_seed3_end:
-			ret
 		; End of the procedure to load the seed 3
 	
+		increment_seed_end:
+			;making sure s's remain unchanged
+			ldw s7, 0(sp)
+			addi sp, sp, 4
+			ldw s6, 0(sp)
+			addi sp, sp, 4
+			ldw s5, 0(sp)
+			addi sp, sp, 4
+			ldw s4, 0(sp)
+			addi sp, sp, 4
+			ldw s3, 0(sp)
+			addi sp, sp, 4
+			ldw s2, 0(sp)
+			addi sp, sp, 4
+			ldw s1, 0(sp)
+			addi sp, sp, 4
+			ldw s0, 0(sp)
+			addi sp, sp, 4
+			;making sure s's remain unchanged
+		
+		ret ; once we are done we can exit
+			
 	; END:increment_seed
 
 
    
 	; BEGIN:update_state
 	update_state:
-		ldw t0, CURR_STATE (zero) ; t0 = current state
+		;making sure s's remain unchanged
+		addi sp, sp, -4
+		stw s0, 0(sp)
+		addi sp, sp, -4
+		stw s1, 0(sp)
+		addi sp, sp, -4
+		stw s2, 0(sp)
+		addi sp, sp, -4
+		stw s3, 0(sp)
+		addi sp, sp, -4
+		stw s4, 0(sp)
+		addi sp, sp, -4
+		stw s5, 0(sp)
+		addi sp, sp, -4
+		stw s6, 0(sp)
+		addi sp, sp, -4
+		stw s7, 0(sp)
+		;making sure s's remain unchanged
+
+		ldw s0, CURR_STATE (zero) ; t0 = current state
 			
-		; first we will check whether b1 = 1 (if it's the case then next state is RUN
-		addi t7, zero, 1 ; we create a mask
-		srli t6, a0, 1 ; the LSB of t6 is the value of b1
-		and t7, t7, t6 ; if the LSB is 1 then t7 = 1 o/w t7 = 0
-		beq t7, zero, update_state_chooser ; if t7 = 0 then we test other options (based on the current state)
-		addi t1, zero, RUN ; if t7 = 1 then the new state is RUN
-		addi t2, zero, RUNNING
-		stw t2, PAUSE (zero)
+		; first we will check whether b1 = 1 (if it's the case then next state is RUN)
+		addi s7, zero, 1 ; we create a mask
+		srli s6, a0, 1 ; the LSB of t6 is the value of b1
+		and s7, s7, s6 ; if the LSB is 1 then s7 = 1 o/w s7 = 0
+		beq s7, zero, update_state_chooser ; if s7 = 0 then we test other options (based on the current state)
+		addi s1, zero, RUN ; if s7 = 1 then the new state is RUN
+		addi s2, zero, RUNNING
+		stw s2, PAUSE (zero) ; we put the game in running state
 		br update_state_end
 
 		update_state_chooser:
-			addi t1, zero, INIT
-			beq t0, t1, update_state_init ; we branch if current state is INIT
+			addi s1, zero, INIT
+			beq s0, s1, update_state_init ; we branch if current state is INIT
 	
-			addi t1, zero, RUN
-			beq t0, t1, update_state_run ; we branch if current state is RUN
+			addi s1, zero, RUN
+			beq s0, s1, update_state_run ; we branch if current state is RUN
 	
-			addi t1, zero, RAND
-			beq t0, t1, update_state_end ; all cases for when the current state is RAND are already covered
+			addi s1, zero, RAND
+			beq s0, s1, update_state_end ; all cases for when the current state is RAND are already covered
 
 		update_state_run: ; when the current state is RUN		
 			; check the number of steps left
-			ldw t0, CURR_STEP (zero)
-			beq t0, zero, run_to_init ; if current step = 0 we branch
+			ldw s0, CURR_STEP (zero)
+			beq s0, zero, run_to_init ; if current step = 0 we branch
 
 			; check value of the button 3
-			addi t7, zero, 1 ; we create a mask
-			srli t6, a0, 3 ; the LSB of t6 is the value of b3
-			and t7, t7, t6 ; if the LSB is 1 then t7 = 1 o/w t7 = 0
-			beq t7, zero, update_state_end ; if t7 = 0 then the current state won't change
+			addi s7, zero, 1 ; we create a mask
+			srli s6, a0, 3 ; the LSB of t6 is the value of b3
+			and s7, s7, s6 ; if the LSB is 1 then s7 = 1 o/w s7 = 0
+			beq s7, zero, update_state_end ; if s7 = 0 then the current state won't change
 			
 			run_to_init:
-			addi t1, zero, INIT ; if t7 = 1 then the new state is INIT
+			addi s1, zero, INIT ; if s7 = 1 then the new state is INIT
 			; we push the current ra to the stack
 			addi sp, sp, -4 
 			stw ra, 0 (sp)
@@ -643,21 +705,40 @@ game_of_life:
 		
 		update_state_init: ; when the current state is INIT
 			; first we check whether b0 is active
-			addi t7, zero, 1 ; we create a mask
-			and t7, t7, a0 ; if the LSB is 1 then t7 = 1 o/w t7 = 0
-			beq t7, zero, update_state_end ; if t7 = 0 then the current state won't change
+			addi s7, zero, 1 ; we create a mask
+			and s7, s7, a0 ; if the LSB is 1 then s7 = 1 o/w s7 = 0
+			beq s7, zero, update_state_end ; if s7 = 0 then the current state won't change
 
 			; if b0 + 1 = N_SEEDS the next state is RAND o/w we do not change
-			ldw t6, SEED (zero) ; t6 = N
-			addi t7, zero, 1 ; t7 = t7 + 1
-			cmpeqi t7, t6, N_SEEDS ; t7 = 1 if N = N_SEEDS, o/w t7 = 0
-			beq t7, zero, update_state_end ; if t7 = 0 we don't change the current state
+			ldw s6, SEED (zero) ; s6 = N
+			cmpeqi s7, s6, N_SEEDS ; s7 = 1 if N = N_SEEDS, o/w s7 = 0
+			beq s7, zero, update_state_end ; if s7 = 0 we don't change the current state
 		
-			addi t1, zero, RAND	; if t7 = 1 then the new state is RAND
+			addi s1, zero, RAND	; if s7 = 1 then the new state is RAND
 			br update_state_end
 
 		update_state_end:
-			stw t1, CURR_STATE (zero) ; we stock the new current state
+			stw s1, CURR_STATE (zero) ; we stock the new current state
+
+			;making sure s's remain unchanged
+			ldw s7, 0(sp)
+			addi sp, sp, 4
+			ldw s6, 0(sp)
+			addi sp, sp, 4
+			ldw s5, 0(sp)
+			addi sp, sp, 4
+			ldw s4, 0(sp)
+			addi sp, sp, 4
+			ldw s3, 0(sp)
+			addi sp, sp, 4
+			ldw s2, 0(sp)
+			addi sp, sp, 4
+			ldw s1, 0(sp)
+			addi sp, sp, 4
+			ldw s0, 0(sp)
+			addi sp, sp, 4
+			;making sure s's remain unchanged
+
 			ret
 
 	; END:update_state
@@ -668,16 +749,35 @@ game_of_life:
 
 	; BEGIN:select_action
 	select_action:
+		;making sure s's remain unchanged
+		addi sp, sp, -4
+		stw s0, 0(sp)
+		addi sp, sp, -4
+		stw s1, 0(sp)
+		addi sp, sp, -4
+		stw s2, 0(sp)
+		addi sp, sp, -4
+		stw s3, 0(sp)
+		addi sp, sp, -4
+		stw s4, 0(sp)
+		addi sp, sp, -4
+		stw s5, 0(sp)
+		addi sp, sp, -4
+		stw s6, 0(sp)
+		addi sp, sp, -4
+		stw s7, 0(sp)
+		;making sure s's remain unchanged
+
 		ldw t0, CURR_STATE (zero) ; based on the current state, each button doesn't have the same effect
 		
 		select_action_state_chooser:
-			addi t1, zero, INIT
+			addi t1, zero, INIT ; t1 = INIT
 			beq t0, t1, select_action_init ; we branch if current state is INIT
 	
-			addi t1, zero, RUN
+			addi t1, zero, RUN ; t1 = RUN
 			beq t0, t1, select_action_run ; we branch if current state is RUN
 	
-			addi t1, zero, RAND
+			addi t1, zero, RAND ; t1 = RAND
 			beq t0, t1, select_action_rand ; we branch if current state is RAND
 	
 		select_action_init:
@@ -688,20 +788,7 @@ game_of_life:
 			s_a_init_b0:
 				and t2, t1, t0 ; t2 = 1 if b0 is pressed. t2 = 0 o/w
 				beq t2, zero, s_a_init_b1 ; if b0 isn't pressed we check the other buttons
-				
-				; we push the current ra to the stack
-				addi sp, sp, -4 
-				stw ra, 0 (sp)
-				call increment_seed ; if b0 is pressed we go through the predefined seeds
-				; we retrieve the current ra from the stack
-				ldw ra, 0 (sp)
-				addi sp, sp, 4
 
-				; we check if the current state changed
-				addi t7, zero, RAND
-				ldw t6, CURR_STATE (zero)
-				bne t7, t6, s_a_init_b1 ; if the current state has not changed we check the other buttons
-				
 				; we push the current ra to the stack
 				addi sp, sp, -4 
 				stw ra, 0 (sp)
@@ -854,9 +941,30 @@ game_of_life:
 				; TO DO
 
 		select_action_end:
+			;making sure s's remain unchanged
+			ldw s7, 0(sp)
+			addi sp, sp, 4
+			ldw s6, 0(sp)
+			addi sp, sp, 4
+			ldw s5, 0(sp)
+			addi sp, sp, 4
+			ldw s4, 0(sp)
+			addi sp, sp, 4
+			ldw s3, 0(sp)
+			addi sp, sp, 4
+			ldw s2, 0(sp)
+			addi sp, sp, 4
+			ldw s1, 0(sp)
+			addi sp, sp, 4
+			ldw s0, 0(sp)
+			addi sp, sp, 4
+			;making sure s's remain unchanged
+
 			ret
 	
 	; END:select_action
+
+
 
 
 	; BEGIN:cell_fate
@@ -882,6 +990,8 @@ game_of_life:
 			addi v0, zero, 1 ;else lives
 			ret
 	; END:cell_fate
+
+
 
 
 	; BEGIN:find_neighbours
@@ -1157,8 +1267,7 @@ game_of_life:
 
 
 
-
-	; 3.7. Inputs to the game
+; 3.7. Inputs to the game
 
 	; BEGIN:get_input
 	get_input:
@@ -1173,7 +1282,7 @@ game_of_life:
 
 
 
-	; 3.8. Game step handling
+; 3.8. Game step handling
 	
 	; BEGIN:decrement_step
 	decrement_step:
@@ -1244,8 +1353,37 @@ game_of_life:
 	
 	; BEGIN:reset_game
 	reset_game:
+		;making sure s's remain unchanged
+		addi sp, sp, -4
+		stw s0, 0(sp)
+		addi sp, sp, -4
+		stw s1, 0(sp)
+		addi sp, sp, -4
+		stw s2, 0(sp)
+		addi sp, sp, -4
+		stw s3, 0(sp)
+		addi sp, sp, -4
+		stw s4, 0(sp)
+		addi sp, sp, -4
+		stw s5, 0(sp)
+		addi sp, sp, -4
+		stw s6, 0(sp)
+		addi sp, sp, -4
+		stw s7, 0(sp)
+		;making sure s's remain unchanged
+
 		addi s0, zero, 1 ; s0 = 1
 		stw s0, CURR_STEP (zero) ; we set the current step to 1
+
+		; now we display the current step on the display
+
+		; we push the current ra to the stack
+		addi sp, sp, -4 
+		stw ra, 0 (sp)
+		call decrement_step
+		; we retrieve the current ra from the stack
+		ldw ra, 0 (sp)
+		addi sp, sp, 4
 
 		stw zero, SEED (zero) ; we select the seed 0
 
@@ -1291,6 +1429,25 @@ game_of_life:
 
 		addi t0, zero, MIN_SPEED ; t0 = 1
 		stw t0, SPEED (zero) ; we set the game speed to 1 (MIN_SPEED)
+
+		;making sure s's remain unchanged
+		ldw s7, 0(sp)
+		addi sp, sp, 4
+		ldw s6, 0(sp)
+		addi sp, sp, 4
+		ldw s5, 0(sp)
+		addi sp, sp, 4
+		ldw s4, 0(sp)
+		addi sp, sp, 4
+		ldw s3, 0(sp)
+		addi sp, sp, 4
+		ldw s2, 0(sp)
+		addi sp, sp, 4
+		ldw s1, 0(sp)
+		addi sp, sp, 4
+		ldw s0, 0(sp)
+		addi sp, sp, 4
+		;making sure s's remain unchanged
 		
 		ret ; once we are done we return
 
