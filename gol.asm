@@ -1,4 +1,4 @@
-    ;;    game state memory location
+     ;;    game state memory location
     .equ CURR_STATE, 0x1000              ; current game state
     .equ GSA_ID, 0x1004                  ; gsa currently in use for drawing
     .equ PAUSE, 0x1008                   ; is the game paused or running
@@ -37,14 +37,15 @@ game_of_life:
 	call reset_game 
 	call get_input
 	add s0, v0, zero ; we stock the return value of get_input in s0
+	add s1, zero, zero
 
 	game_of_life_loop:
 		bne s1, zero, game_of_life ; if done != 0 we exit the loop
 
-		add a0, v0, zero ; we push the input value of select_action
+		add a0, s0, zero ; we push the input value of select_action
 		call select_action 
 
-		add a0, v0, zero ; we push the input value of update_state
+		add a0, s0, zero ; we push the input value of update_state
 		call update_state
 
 		call update_gsa
@@ -682,25 +683,13 @@ game_of_life:
 			beq s0, s1, update_state_end ; all cases for when the current state is RAND are already covered
 
 		update_state_run: ; when the current state is RUN		
-			; check the number of steps left
-			ldw s0, CURR_STEP (zero)
-			beq s0, zero, run_to_init ; if current step = 0 we branch
-
 			; check value of the button 3
 			addi s7, zero, 1 ; we create a mask
 			srli s6, a0, 3 ; the LSB of t6 is the value of b3
 			and s7, s7, s6 ; if the LSB is 1 then s7 = 1 o/w s7 = 0
 			beq s7, zero, update_state_end ; if s7 = 0 then the current state won't change
-			
-			run_to_init:
+
 			addi s1, zero, INIT ; if s7 = 1 then the new state is INIT
-			; we push the current ra to the stack
-			addi sp, sp, -4 
-			stw ra, 0 (sp)
-			call reset_game ; for any change of state from RUN to INIT the reset_game procedure has to be called
-			; we retrieve the current ra from the stack
-			ldw ra, 0 (sp)
-			addi sp, sp, 4
 			br update_state_end
 		
 		update_state_init: ; when the current state is INIT
@@ -996,6 +985,25 @@ game_of_life:
 
 	; BEGIN:find_neighbours
 	find_neighbours:
+	;making sure s's remain unchanged
+		addi sp, sp, -4
+		stw s0, 0(sp)
+		addi sp, sp, -4
+		stw s1, 0(sp)
+		addi sp, sp, -4
+		stw s2, 0(sp)
+		addi sp, sp, -4
+		stw s3, 0(sp)
+		addi sp, sp, -4
+		stw s4, 0(sp)
+		addi sp, sp, -4
+		stw s5, 0(sp)
+		addi sp, sp, -4
+		stw s6, 0(sp)
+		addi sp, sp, -4
+		stw s7, 0(sp)
+		;making sure s's remain unchanged
+
 		add s7, zero, zero ;neighbours counter
 		add s0, zero, a0 ;x coordinate
 		add s1, zero, a1 ;y coordinate
@@ -1017,7 +1025,7 @@ game_of_life:
 
 		add v0, zero, s7
 		
-		ret
+		br find_neighbours_end
 		
 		above_neighbours:
 		beq s1, zero, last_line_neighbours
@@ -1034,7 +1042,7 @@ game_of_life:
 		ldw ra, 0(sp)
 		addi sp, sp, 4 ;now v0 contains the value of the line
 		add s2, zero, v0
-		ret
+		br find_neighbours_end
 
 		line_neighbours:
 		add a0, zero, s1
@@ -1045,7 +1053,7 @@ game_of_life:
 		ldw ra, 0(sp)
 		addi sp, sp, 4 ;now v0 contains the value of the line
 		add s2, zero, v0
-		ret
+		br find_neighbours_end
 
 		under_neighbours:
 		addi t0, zero, N_GSA_LINES
@@ -1064,7 +1072,7 @@ game_of_life:
 		ldw ra, 0(sp)
 		addi sp, sp, 4 ;now v0 contains the value of the line
 		add s2, zero, v0
-		ret
+		br find_neighbours_end
 
 
 		computing_neighbours:
@@ -1114,8 +1122,29 @@ game_of_life:
 			srli s4, s4, 2
 			add s7, s7, s4
 		
-		ret
+		br find_neighbours_end
 
+		find_neighbours_end:
+			;making sure s's remain unchanged
+			ldw s7, 0(sp)
+			addi sp, sp, 4
+			ldw s6, 0(sp)
+			addi sp, sp, 4
+			ldw s5, 0(sp)
+			addi sp, sp, 4
+			ldw s4, 0(sp)
+			addi sp, sp, 4
+			ldw s3, 0(sp)
+			addi sp, sp, 4
+			ldw s2, 0(sp)
+			addi sp, sp, 4
+			ldw s1, 0(sp)
+			addi sp, sp, 4
+			ldw s0, 0(sp)
+			addi sp, sp, 4
+			;making sure s's remain unchanged
+			
+			ret ; once we are done we can exit the procedure
 	; END:find_neighbours
 
 
@@ -1123,6 +1152,25 @@ game_of_life:
 
 	; BEGIN:update_gsa
 	update_gsa:
+		;making sure s's remain unchanged
+		addi sp, sp, -4
+		stw s0, 0(sp)
+		addi sp, sp, -4
+		stw s1, 0(sp)
+		addi sp, sp, -4
+		stw s2, 0(sp)
+		addi sp, sp, -4
+		stw s3, 0(sp)
+		addi sp, sp, -4
+		stw s4, 0(sp)
+		addi sp, sp, -4
+		stw s5, 0(sp)
+		addi sp, sp, -4
+		stw s6, 0(sp)
+		addi sp, sp, -4
+		stw s7, 0(sp)
+		;making sure s's remain unchanged
+
 		; we push the current ra to the stack
 		addi sp, sp, -4 
 		stw ra, 0 (sp)
@@ -1131,9 +1179,7 @@ game_of_life:
 		ldw t1, PAUSE (zero) ; t1 is the current pause step
 		beq t0, t1, update_gsa_end ; if the game is paused this procedure should do nothing
 
-		
-
-		addi s7, zero, N_GSA_LINES
+		addi s7, zero, N_GSA_LINES ; s7 = 8 (number of lines of the GSA)
 
 		update_gsa_y_loop: 
 			addi s7, s7, -1 ; we decrement our counter
@@ -1186,6 +1232,26 @@ game_of_life:
 			; we retrieve the current ra from the stack
 			ldw ra, 0 (sp)
 			addi sp, sp, 4
+
+			;making sure s's remain unchanged
+			ldw s7, 0(sp)
+			addi sp, sp, 4
+			ldw s6, 0(sp)
+			addi sp, sp, 4
+			ldw s5, 0(sp)
+			addi sp, sp, 4
+			ldw s4, 0(sp)
+			addi sp, sp, 4
+			ldw s3, 0(sp)
+			addi sp, sp, 4
+			ldw s2, 0(sp)
+			addi sp, sp, 4
+			ldw s1, 0(sp)
+			addi sp, sp, 4
+			ldw s0, 0(sp)
+			addi sp, sp, 4
+			;making sure s's remain unchanged
+
 			ret ; once we are done we return		
 	
 	; END:update_gsa
@@ -1271,8 +1337,7 @@ game_of_life:
 
 	; BEGIN:get_input
 	get_input:
-		ldw t0, BUTTONS+4 (zero) ; we load the falling edge detection
-		add v0, zero, t0 ; we return the value of the edgecapture register
+		ldw v0, BUTTONS+4 (zero) ; we load the falling edge detection in the return register
 		stw zero, BUTTONS+4 (zero) ; we clear the edgecapture register
 
 		ret ; once it's done we can return
