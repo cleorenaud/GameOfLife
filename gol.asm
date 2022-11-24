@@ -920,26 +920,16 @@ game_of_life:
 				srli t0, t0, 1 ; we shift a0, this way its LSB is b3
 				and t2, t1, t0 ; t2 = 1 if b3 is pressed. t2 = 0 o/w0
 				beq t2, zero, s_a_run_b4 ; if b3 isn't pressed we check the other buttons
-				; we push the current ra to the stack
-				addi sp, sp, -4 
-				stw ra, 0 (sp)
-				call reset_game ; if b0 is pressed we increment the seed
-				; we retrieve the current ra from the stack
-				ldw ra, 0 (sp)
-				addi sp, sp, 4
+
 
 			s_a_run_b4:
 				srli t0, t0, 1 ; we shift a0, this way its LSB is b4
 				and t2, t1, t0 ; t2 = 1 if b4 is pressed. t2 = 0 o/w0
 				beq t2, zero, select_action_end ; if b4 isn't pressed we are done
 				; if b4 is pressed we remplace the current game with a new random one
-				; we push the current ra to the stack
-				addi sp, sp, -4 
-				stw ra, 0 (sp)
-				call increment_seed ; if b0 is pressed we increment the seed
-				; we retrieve the current ra from the stack
-				ldw ra, 0 (sp)
-				addi sp, sp, 4
+				addi t0, zero, 1
+				stw t0, CURR_STEP(zero)
+			
 				
 
 		select_action_end:
