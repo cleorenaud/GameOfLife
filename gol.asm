@@ -34,23 +34,6 @@ game_of_life:
 	;set stack pointer at adequate value
 	addi sp, zero, CUSTOM_VAR_END
 
-
-	;test mask
-	addi t0, zero, 4 ;change this number to get the desired mask
-	stw t0, SEED (zero)
-	call random_gsa
-	call mask
-	call draw_gsa
-	call wait
-
-	;tests neighbours
-	;call random_gsa
-	;addi a0, zero, 11
-	;addi a1, zero, 7
-	;call find_neighbours
-	;v1 =1, v0 = 8
-	;call wait
-
 	call reset_game 
 	call get_input
 	add s0, v0, zero ; we stock the return value of get_input in s0
@@ -183,21 +166,19 @@ game_of_life:
 			add t1, t1, t2
 			add t3, t3, t4
 			addi t4, zero, 1
-			addi t2, zero, 3 ;should it be +3 or +4 here????
+			addi t2, zero, 3 
 			bltu t3, a0, a0_loop
 
-
-		
 		beq t0, zero, get_gsa_0 ; if the current gsa is 0 we do get_gsa_0, else we do get_gsa_1
 
 		get_gsa_1:
 			ldw v0, GSA1 (t1) ; we load the y line of the current gsa in v0
-		ret
+			ret
 
 		get_gsa_0:
 			ldw v0, GSA0 (t1) ; we load the y line of the current gsa in v0
-		ret
-		
+			ret
+
 	; END:get_gsa
 
 
@@ -214,48 +195,41 @@ game_of_life:
 			add t1, t1, t2
 			add t3, t3, t4
 			addi t4, zero, 1
-			addi t2, zero, 3 ;should it be +3 or +4 here????
+			addi t2, zero, 3 
 			bltu t3, a1, a1_loop
 			
 		beq t0, zero, set_gsa_0 ; if the current gsa is 0 we do set_gsa_0, else we do set_gsa_1
 		
 		set_gsa_1:
 			stw a0, GSA1 (t1) ; we store the y line in its position in the current gsa
-		ret
+			ret
 	
 		set_gsa_0:
 			stw a0, GSA0 (t1) ; we store the y line in its position in the current gsa
-		ret
+			ret
 
 	; END:set_gsa
 
     ; BEGIN:draw_gsa
 	draw_gsa:
-;making sure s's remain unchanged
+		;making sure s's remain unchanged
 		addi sp, sp, -4
 		stw s0, 0(sp)
-
 		addi sp, sp, -4
 		stw s1, 0(sp)
-
 		addi sp, sp, -4
 		stw s2, 0(sp)
-
 		addi sp, sp, -4
 		stw s3, 0(sp)
-
 		addi sp, sp, -4
 		stw s4, 0(sp)
-
 		addi sp, sp, -4
 		stw s5, 0(sp)
-
 		addi sp, sp, -4
 		stw s6, 0(sp)
-
 		addi sp, sp, -4
 		stw s7, 0(sp)
-;making sure s's remain unchanged
+		;making sure s's remain unchanged
 
 		addi sp, sp, -4
 		stw ra, 0(sp)
@@ -269,7 +243,6 @@ game_of_life:
 		add a0, zero, zero
 		add a1, zero, zero
 		addi s5, zero, N_GSA_LINES
-
 
 		y_loop:
 			add s2, zero, zero ;used to iterate over x's
@@ -308,66 +281,50 @@ game_of_life:
 				addi a0, a0, 1
 				bltu a0, s5, y_loop ;we continue while a0 < 8
 
-;making sure s's remain unchanged
-
+		;making sure s's remain unchanged
 		ldw s7, 0(sp)
 		addi sp, sp, 4
-
 		ldw s6, 0(sp)
 		addi sp, sp, 4
-
 		ldw s5, 0(sp)
 		addi sp, sp, 4
-
 		ldw s4, 0(sp)
 		addi sp, sp, 4
-
 		ldw s3, 0(sp)
 		addi sp, sp, 4
-
 		ldw s2, 0(sp)
 		addi sp, sp, 4
-
 		ldw s1, 0(sp)
 		addi sp, sp, 4
-
 		ldw s0, 0(sp)
 		addi sp, sp, 4
-;making sure s's remain unchanged
+		;making sure s's remain unchanged
 		
 		ret
-
 			
 	; END:draw_gsa
 
 
 	; BEGIN:random_gsa
 	random_gsa:
-;making sure s's remain unchanged
+		;making sure s's remain unchanged
 		addi sp, sp, -4
 		stw s0, 0(sp)
-
 		addi sp, sp, -4
 		stw s1, 0(sp)
-
 		addi sp, sp, -4
 		stw s2, 0(sp)
-
 		addi sp, sp, -4
 		stw s3, 0(sp)
-
 		addi sp, sp, -4
 		stw s4, 0(sp)
-
 		addi sp, sp, -4
 		stw s5, 0(sp)
-
 		addi sp, sp, -4
 		stw s6, 0(sp)
-
 		addi sp, sp, -4
 		stw s7, 0(sp)
-;making sure s's remain unchanged
+		;making sure s's remain unchanged
 
 			add a0, zero, zero
 			add a1, zero, zero
@@ -395,32 +352,24 @@ game_of_life:
 				addi a1, a1, 1
 				bltu a1, s5, random_y_loop
 
-;making sure s's remain unchanged
-
+		;making sure s's remain unchanged
 		ldw s7, 0(sp)
 		addi sp, sp, 4
-
 		ldw s6, 0(sp)
 		addi sp, sp, 4
-
 		ldw s5, 0(sp)
 		addi sp, sp, 4
-
 		ldw s4, 0(sp)
 		addi sp, sp, 4
-
 		ldw s3, 0(sp)
 		addi sp, sp, 4
-
 		ldw s2, 0(sp)
 		addi sp, sp, 4
-
 		ldw s1, 0(sp)
 		addi sp, sp, 4
-
 		ldw s0, 0(sp)
 		addi sp, sp, 4
-;making sure s's remain unchanged
+		;making sure s's remain unchanged
 
 		ret
 	; END:random_gsa
@@ -451,13 +400,18 @@ game_of_life:
 			ret
 	; END:change_speed
 
+
+
+
 	; BEGIN:pause_game
 	pause_game:
 		ldw t0, PAUSE (zero)
-		xori t0, t0, 1
+		xori t0, t0, 1 ; we change the pause state of the game
 		stw t0, PAUSE (zero)
 		ret
 	; END:pause_game
+
+
 
 
 	; BEGIN:change_steps
@@ -466,15 +420,15 @@ game_of_life:
 		
 		change_step_b4: ; to set the new value of the units
 			beq a0, zero, change_step_b3 ; if button 4 is not pressed we don't change the value of the units
-			addi t0, t0, 1 ; we add 1 to the units
+			addi t0, t0, 0x001 ; we add 1 to the units
 
 		change_step_b3: ; to set the new value of the tens
 			beq a1, zero, change_step_b2 ; if button 3 is not pressed we don't change the value of the tens
-			addi t0, t0, 16; we add 1 to the tens	
+			addi t0, t0, 0x010; we add 1 to the tens	
 
 		change_step_b2: ; to set the new value of the hundreds
 			beq a2, zero, change_step_end ; if button 2 is not pressed we don't change the value of the hundreds
-			addi t0, t0, 256; we add 1 to the hundreds
+			addi t0, t0, 0x100; we add 1 to the hundreds
 
 		change_step_end: ; once we have changed what we should, we are done
 			stw t0, CURR_STEP (zero)
@@ -483,369 +437,161 @@ game_of_life:
 	; END:change_steps
 
 
+
+
 	; BEGIN:increment_seed
 	increment_seed:
-				ldw t0, SEED (zero)
-				ldw t1, CURR_STATE (zero)
-				addi t2, zero, RAND
+		ldw t0, SEED (zero) ; t0 is the current seed number
+	
+		ldw t1, CURR_STATE (zero) ; t1 is the current state 
+		addi t2, zero, RAND ; t2 is the state RAND
+		beq t1, t2, rand_seed ; if the current state is RAND we branch
 
-				beq t1, t2, rand_seed
+		init_seed:
+			addi t0, t0, 1 ; we increment the seed number 
+			stw t0, SEED (zero) ; and we store the new seed number
 
-				init_seed:
-					addi t0, t0, 1
-					stw t0, SEED (zero)
+			; we determine which seed we must load
+			addi t3, zero, 0 ; t3 = 0
+			beq t0, t3, load_seed0 ; we branch if we must load seed0
+			addi t3, t3, 1 ; t3 = 1
+			beq t0, t3, load_seed1 ; we branch if we must load seed1
+			addi t3, t3, 1 ; t3 = 2
+			beq t0, t3, load_seed2 ; we branch if we must load seed2
+			addi t3, t3, 1 ; t3 = 3
+			beq t0, t3, load_seed3 ; we branch if we must load seed3
 
-					;we update the gsa with the given seed 0,1,2 or 3
-					add t3, zero, zero
-					addi t4, zero, 1
-					addi t5, zero, 2
-					addi t6, zero, 3
+		rand_seed:
+			addi t0, zero, N_SEEDS
+			stw t0, SEED (zero)
 
-					beq t0, t3, load_seed_0
-					beq t0, t4, load_seed_1
-					beq t0, t5, load_seed_2
-					beq t0, t6, load_seed_3
-
-					rand_seed:
-					addi t0, zero, N_SEEDS
-					stw t0, SEED (zero)
-
-
-					addi sp, sp, -4
-					stw ra, 0(sp)
-					call random_gsa
-					ldw ra, 0(sp)
-					addi sp, sp, 4
+			; we push the current ra to the stack
+			addi sp, sp, -4
+			stw ra, 0(sp)
+			call random_gsa
+			; we retrieve the current ra from the stack
+			ldw ra, 0(sp)
+			addi sp, sp, 4
 				
-				ret
+			ret
 	
-					load_seed_0:
-						;0
-						add a1, zero, zero
-						ldw a0, seed0 (zero)
-
-						addi sp, sp, -4
-						stw ra, 0(sp)
-						call set_gsa
-						ldw ra, 0(sp)
-						addi sp, sp, 4
-
-						;1
-						addi a1, zero, 1
-						ldw a0, seed0+4 (zero)
-					
-						addi sp, sp, -4
-						stw ra, 0(sp)
-						call set_gsa
-						ldw ra, 0(sp)
-						addi sp, sp, 4
-
-						;2
-						addi a1, zero, 2
-						ldw a0, seed0+8 (zero)
-
-						addi sp, sp, -4
-						stw ra, 0(sp)
-						call set_gsa
-						ldw ra, 0(sp)
-						addi sp, sp, 4
-
-						;3
-						addi a1, zero, 3
-						ldw a0, seed0+12 (zero)
-
-						addi sp, sp, -4
-						stw ra, 0(sp)
-						call set_gsa
-						ldw ra, 0(sp)
-						addi sp, sp, 4
-
-						;4
-						addi a1, zero, 4
-						ldw a0, seed0+16 (zero)
-						add ba, ra, zero
-						call set_gsa
-						add ra, ba, zero
-						;5
-						addi a1, zero, 5
-						ldw a0, seed0+20 (zero)
-
-						addi sp, sp, -4
-						stw ra, 0(sp)
-						call set_gsa
-						ldw ra, 0(sp)
-						addi sp, sp, 4
-
-						;6
-						addi a1, zero, 6
-						ldw a0, seed0+24 (zero)
-
-						addi sp, sp, -4
-						stw ra, 0(sp)
-						call set_gsa
-						ldw ra, 0(sp)
-						addi sp, sp, 4
-
-						;7
-						addi a1, zero, 7
-						ldw a0, seed0+28 (zero)
-
-						addi sp, sp, -4
-						stw ra, 0(sp)
-						call set_gsa
-						ldw ra, 0(sp)
-						addi sp, sp, 4
-
-					ret
-
-					load_seed_1:
-						;0
-						add a1, zero, zero
-						ldw a0, seed1 (zero)
-
-						addi sp, sp, -4
-						stw ra, 0(sp)
-						call set_gsa
-						ldw ra, 0(sp)
-						addi sp, sp, 4
-
-						;1
-						addi a1, zero, 1
-						ldw a0, seed1+4 (zero)
-
-						addi sp, sp, -4
-						stw ra, 0(sp)
-						call set_gsa
-						ldw ra, 0(sp)
-						addi sp, sp, 4
-
-						;2
-						addi a1, zero, 2
-						ldw a0, seed1+8 (zero)
-
-						addi sp, sp, -4
-						stw ra, 0(sp)
-						call set_gsa
-						ldw ra, 0(sp)
-						addi sp, sp, 4
-
-						;3
-						addi a1, zero, 3
-						ldw a0, seed1+12 (zero)
-
-						addi sp, sp, -4
-						stw ra, 0(sp)
-						call set_gsa
-						ldw ra, 0(sp)
-						addi sp, sp, 4
-
-						;4
-						addi a1, zero, 4
-						ldw a0, seed1+16 (zero)
-
-						addi sp, sp, -4
-						stw ra, 0(sp)
-						call set_gsa
-						ldw ra, 0(sp)
-						addi sp, sp, 4
-
-						;5
-						addi a1, zero, 5
-						ldw a0, seed1+20 (zero)
-
-						addi sp, sp, -4
-						stw ra, 0(sp)
-						call set_gsa
-						ldw ra, 0(sp)
-						addi sp, sp, 4
-
-						;6
-						addi a1, zero, 6
-						ldw a0, seed1+24 (zero)
-
-						addi sp, sp, -4
-						stw ra, 0(sp)
-						call set_gsa
-						ldw ra, 0(sp)
-						addi sp, sp, 4
-
-						;7
-						addi a1, zero, 7
-						ldw a0, seed1+28 (zero)
-
-						addi sp, sp, -4
-						stw ra, 0(sp)
-						call set_gsa
-						ldw ra, 0(sp)
-						addi sp, sp, 4
-
-					ret
-
-
-					load_seed_2:
-						;0
-						add a1, zero, zero
-						ldw a0, seed2 (zero)
-
-						addi sp, sp, -4
-						stw ra, 0(sp)
-						call set_gsa
-						ldw ra, 0(sp)
-						addi sp, sp, 4
-
-						;1
-						addi a1, zero, 1
-						ldw a0, seed2+4 (zero)
-
-						addi sp, sp, -4
-						stw ra, 0(sp)
-						call set_gsa
-						ldw ra, 0(sp)
-						addi sp, sp, 4
-
-						;2
-						addi a1, zero, 2
-						ldw a0, seed2+8 (zero)
-
-						addi sp, sp, -4
-						stw ra, 0(sp)
-						call set_gsa
-						ldw ra, 0(sp)
-						addi sp, sp, 4
-
-						;3
-						addi a1, zero, 3
-						ldw a0, seed2+12 (zero)
-
-						addi sp, sp, -4
-						stw ra, 0(sp)
-						call set_gsa
-						ldw ra, 0(sp)
-						addi sp, sp, 4
-
-						;4
-						addi a1, zero, 4
-						ldw a0, seed2+16 (zero)
-						add ba, ra, zero
-						call set_gsa
-						add ra, ba, zero
-						;5
-						addi a1, zero, 5
-						ldw a0, seed2+20 (zero)
-
-						addi sp, sp, -4
-						stw ra, 0(sp)
-						call set_gsa
-						ldw ra, 0(sp)
-						addi sp, sp, 4
-
-						;6
-						addi a1, zero, 6
-						ldw a0, seed2+24 (zero)
-
-						addi sp, sp, -4
-						stw ra, 0(sp)
-						call set_gsa
-						ldw ra, 0(sp)
-						addi sp, sp, 4
-
-						;7
-						addi a1, zero, 7
-						ldw a0, seed2+28 (zero)
-
-						addi sp, sp, -4
-						stw ra, 0(sp)
-						call set_gsa
-						ldw ra, 0(sp)
-						addi sp, sp, 4
-
-					ret
-
-
-					load_seed_3:
-						;0
-						add a1, zero, zero
-						ldw a0, seed3 (zero)
-
-						addi sp, sp, -4
-						stw ra, 0(sp)
-						call set_gsa
-						ldw ra, 0(sp)
-						addi sp, sp, 4
-
-						;1
-						addi a1, zero, 1
-						ldw a0, seed3+4 (zero)
-
-						addi sp, sp, -4
-						stw ra, 0(sp)
-						call set_gsa
-						ldw ra, 0(sp)
-						addi sp, sp, 4
-
-						;2
-						addi a1, zero, 2
-						ldw a0, seed3+8 (zero)
-
-						addi sp, sp, -4
-						stw ra, 0(sp)
-						call set_gsa
-						ldw ra, 0(sp)
-						addi sp, sp, 4
-
-						;3
-						addi a1, zero, 3
-						ldw a0, seed3+12 (zero)
-
-						addi sp, sp, -4
-						stw ra, 0(sp)
-						call set_gsa
-						ldw ra, 0(sp)
-						addi sp, sp, 4
-
-						;4
-						addi a1, zero, 4
-						ldw a0, seed3+16 (zero)
-
-						addi sp, sp, -4
-						stw ra, 0(sp)
-						call set_gsa
-						ldw ra, 0(sp)
-						addi sp, sp, 4
-
-						;5
-						addi a1, zero, 5
-						ldw a0, seed3+20 (zero)
-
-						addi sp, sp, -4
-						stw ra, 0(sp)
-						call set_gsa
-						ldw ra, 0(sp)
-						addi sp, sp, 4
-
-						;6
-						addi a1, zero, 6
-						ldw a0, seed3+24 (zero)
-
-						addi sp, sp, -4
-						stw ra, 0(sp)
-						call set_gsa
-						ldw ra, 0(sp)
-						addi sp, sp, 4
-
-						;7
-						addi a1, zero, 7
-						ldw a0, seed3+28 (zero)
-
-						addi sp, sp, -4
-						stw ra, 0(sp)
-						call set_gsa
-						ldw ra, 0(sp)
-						addi sp, sp, 4
-
-					ret
+		
+		; Procedure to load the seed 0
+		load_seed0:
+			addi s7, zero, 8 ; s7 = 8, the number of time we will run the loop
+			addi s6, zero, 0 ; s6 = 6, we will increment it by 4 at each iteration of the loop
+			addi s5, zero, 0 ; s5 = 0, we will increment it at each iteration of the loop
+
+		load_seed0_loop:
+			beq s7, zero, load_seed0_end ; if s7 = 0 then we don't have to do the loop anymore
+			
+			ldw a0, seed0 (s6)
+			; we push the current ra to the stack
+			addi sp, sp, -4 
+			stw ra, 0 (sp)
+			call set_gsa
+			; we retrieve the current ra from the stack
+			ldw ra, 0 (sp)
+			addi sp, sp, 4
+
+			addi s6, s6, 4 ; s6 = s6 + 4
+			addi s7, s7, -1 ; s7 = s7 - 1
+			addi s5, s5, 1 ; s5 = s5 + 1
+			addi a1, s5, 0 ; a1 = s5
+			br load_seed0_loop ; we re-iterate
+
+		load_seed0_end:
+			ret 
+		; End of procedure to load the seed 0
+
+
+		; Procedure to load the seed 1
+		load_seed1:
+			addi s7, zero, 8 ; s7 = 8, the number of time we will run the loop
+			addi s6, zero, 0 ; s6 = 6, we will increment it by 4 at each iteration of the loop
+			addi s5, zero, 0 ; s5 = 0, we will increment it at each iteration of the loop
+
+		load_seed1_loop:
+			beq s7, zero, load_seed1_end ; if s7 = 0 then we don't have to do the loop anymore
+			
+			ldw a0, seed1 (s6)
+			; we push the current ra to the stack
+			addi sp, sp, -4 
+			stw ra, 0 (sp)
+			call set_gsa
+			; we retrieve the current ra from the stack
+			ldw ra, 0 (sp)
+			addi sp, sp, 4
+
+			addi s6, s6, 4 ; s6 = s6 + 4
+			addi s7, s7, -1 ; s7 = s7 - 1
+			addi s5, s5, 1 ; s5 = s5 + 1
+			addi a1, s5, 0 ; a1 = s5
+			br load_seed1_loop ; we re-iterate
+
+		load_seed1_end:
+			ret 
+		; End of procedure to load the seed 1
 	
-	;END:increment_seed
+
+		; Procedure to load the seed 2
+		load_seed2:
+			addi s7, zero, 8 ; s7 = 8, the number of time we will run the loop
+			addi s6, zero, 0 ; s6 = 6, we will increment it by 4 at each iteration of the loop
+			addi s5, zero, 0 ; s5 = 0, we will increment it at each iteration of the loop
+
+		load_seed2_loop:
+			beq s7, zero, load_seed2_end ; if s7 = 0 then we don't have to do the loop anymore
+			
+			ldw a0, seed2 (s6)
+			; we push the current ra to the stack
+			addi sp, sp, -4 
+			stw ra, 0 (sp)
+			call set_gsa
+			; we retrieve the current ra from the stack
+			ldw ra, 0 (sp)
+			addi sp, sp, 4
+
+			addi s6, s6, 4 ; s6 = s6 + 4
+			addi s7, s7, -1 ; s7 = s7 - 1
+			addi s5, s5, 1 ; s5 = s5 + 1
+			addi a1, s5, 0 ; a1 = s5
+			br load_seed2_loop ; we re-iterate
+
+		load_seed2_end:
+			ret
+		; End of the procedure to load the seed 2
+
+
+		; Procedure to load the seed 3
+		load_seed3:
+			addi s7, zero, 8 ; s7 = 8, the number of time we will run the loop
+			addi s6, zero, 0 ; s6 = 6, we will increment it by 4 at each iteration of the loop
+			addi s5, zero, 0 ; s5 = 0, we will increment it at each iteration of the loop
+
+		load_seed3_loop:
+			beq s7, zero, load_seed3_end ; if s7 = 0 then we don't have to do the loop anymore
+			
+			ldw a0, seed3 (s6)
+			; we push the current ra to the stack
+			addi sp, sp, -4 
+			stw ra, 0 (sp)
+			call set_gsa
+			; we retrieve the current ra from the stack
+			ldw ra, 0 (sp)
+			addi sp, sp, 4
+
+			addi s6, s6, 4 ; s6 = s6 + 4
+			addi s7, s7, -1 ; s7 = s7 - 1
+			addi s5, s5, 1 ; s5 = s5 + 1
+			addi a1, s5, 0 ; a1 = s5
+			br load_seed3_loop ; we re-iterate
+
+		load_seed3_end:
+			ret
+		; End of the procedure to load the seed 3
+	
+	; END:increment_seed
 
 
    
@@ -859,6 +605,8 @@ game_of_life:
 		and t7, t7, t6 ; if the LSB is 1 then t7 = 1 o/w t7 = 0
 		beq t7, zero, update_state_chooser ; if t7 = 0 then we test other options (based on the current state)
 		addi t1, zero, RUN ; if t7 = 1 then the new state is RUN
+		addi t2, zero, RUNNING
+		stw t2, PAUSE (zero)
 		br update_state_end
 
 		update_state_chooser:
@@ -1491,25 +1239,48 @@ game_of_life:
 
 
 
+; 3.9. Reset
 
-	; 3.9. Reset
-
+	
 	; BEGIN:reset_game
 	reset_game:
-		addi t0, zero, 1 ; t0 = 1
-		stw t0, CURR_STEP (zero) ; we set the current step to 1
+		addi s0, zero, 1 ; s0 = 1
+		stw s0, CURR_STEP (zero) ; we set the current step to 1
 
-		addi t1, zero, -1
-		stw t1, SEED (zero) ; we store -1, when increment_seed is called we will get seed 0
+		stw zero, SEED (zero) ; we select the seed 0
 
 		stw zero, GSA_ID (zero) ; GSA ID is 0
+
+		; the GSA 0 is initialized to the seed 0
+		; we load the seed 0 in our current GSA
+
+		addi s7, zero, 8 ; s7 = 8, the number of time we will run the loop
+		addi s6, zero, 0 ; s6 = 6, we will increment it by 4 at each iteration of the loop
+		addi s5, zero, 0 ; s5 = 0, we will increment it at each iteration of the loop
+
+		reset_game_seed_loop:
+			beq s7, zero, reset_game_end ; if s7 = 0 then we don't have to do the loop anymore
+			
+			ldw a0, seed0 (s6)
+			; we push the current ra to the stack
+			addi sp, sp, -4 
+			stw ra, 0 (sp)
+			call set_gsa
+			; we retrieve the current ra from the stack
+			ldw ra, 0 (sp)
+			addi sp, sp, 4
+
+			addi s6, s6, 4 ; s6 = s6 + 4
+			addi s7, s7, -1 ; s7 = s7 - 1
+			addi s5, s5, 1 ; s5 = s5 + 1
+			addi a1, s5, 0 ; a1 = s5
+			br reset_game_seed_loop ; we re-iterate
+
+		reset_game_end:
 
 		; we push the current ra to the stack
 		addi sp, sp, -4 
 		stw ra, 0 (sp)
-		; the GSA 0 is initialized to the seed 0
-		; we load the seed 0 in our current GSA
-		call increment_seed
 		call draw_gsa ; we display the GSA on the LED
 		; we retrieve the current ra from the stack
 		ldw ra, 0 (sp)
@@ -1522,8 +1293,8 @@ game_of_life:
 		stw t0, SPEED (zero) ; we set the game speed to 1 (MIN_SPEED)
 		
 		ret ; once we are done we return
-	; END:reset_game
 
+	; END:reset_game
 
 
 
