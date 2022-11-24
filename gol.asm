@@ -918,7 +918,7 @@ game_of_life:
 
 
 
-		; BEGIN:select_action
+	; BEGIN:select_action
 	select_action:
 		ldw t0, CURR_STATE (zero) ; based on the current state, each button doesn't have the same effect
 		
@@ -1461,7 +1461,7 @@ game_of_life:
 			add t1, t1, t1 
 			add t1, t1, t1
 			ldw t3, font_data (t1) ; we load the value corresponding to the units
-			stw t3, SEVEN_SEGS (zero) ; we store the value for the SEG[3]
+			stw t3, SEVEN_SEGS+12 (zero) ; we store the value for the SEG[3]
 
 			; we extract the value of the tens
 			slli t1, t0, 24
@@ -1470,7 +1470,7 @@ game_of_life:
 			add t1, t1, t1 
 			add t1, t1, t1
 			ldw t3, font_data (t1) ; we load the value corresponding to the tens
-			stw t3, SEVEN_SEGS+4 (zero) ; we store the value for the SEG[2]
+			stw t3, SEVEN_SEGS+8 (zero) ; we store the value for the SEG[2]
 
 			; we extract the value of the hundreds
 			srli t1, t0, 8
@@ -1478,15 +1478,16 @@ game_of_life:
 			add t1, t1, t1 
 			add t1, t1, t1
 			ldw t3, font_data (t1) ; we load the value corresponding to the hundreds
-			stw t3, SEVEN_SEGS+8 (zero) ; we store the value for the SEG[1]
+			stw t3, SEVEN_SEGS+4 (zero) ; we store the value for the SEG[1]
 
 			ldw t3, font_data (zero) ; we load the value corresponding to zero
-			stw t3, SEVEN_SEGS+12 (zero) ; SEG[0] is always zero
+			stw t3, SEVEN_SEGS (zero) ; SEG[0] is always zero
 
 			addi v0, zero, 0 ; if the current step isn't zero we return zero
 			br decrement_step_end
 		
 	; END:decrement_step
+
 
 
 
