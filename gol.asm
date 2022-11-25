@@ -996,8 +996,28 @@ game_of_life:
 
 
 
-	; BEGIN:find_neighbours
+; BEGIN:find_neighbours
 	find_neighbours:
+		;making sure s's remain unchanged
+		addi sp, sp, -4
+		stw s0, 0(sp)
+		addi sp, sp, -4
+		stw s1, 0(sp)
+		addi sp, sp, -4
+		stw s2, 0(sp)
+		addi sp, sp, -4
+		stw s3, 0(sp)
+		addi sp, sp, -4
+		stw s4, 0(sp)
+		addi sp, sp, -4
+		stw s5, 0(sp)
+		addi sp, sp, -4
+		stw s6, 0(sp)
+		addi sp, sp, -4
+		stw s7, 0(sp)
+		;making sure s's remain unchanged
+
+
 		add s7, zero, zero ;neighbours counter
 		add s0, zero, a0 ;x coordinate
 		add s1, zero, a1 ;y coordinate
@@ -1018,8 +1038,29 @@ game_of_life:
 		addi sp, sp, 4
 
 		add v0, zero, s7
-		
+
+
+		;making sure s's remain unchanged
+		ldw s7, 0(sp)
+		addi sp, sp, 4
+		ldw s6, 0(sp)
+		addi sp, sp, 4
+		ldw s5, 0(sp)
+		addi sp, sp, 4
+		ldw s4, 0(sp)
+		addi sp, sp, 4
+		ldw s3, 0(sp)
+		addi sp, sp, 4
+		ldw s2, 0(sp)
+		addi sp, sp, 4
+		ldw s1, 0(sp)
+		addi sp, sp, 4
+		ldw s0, 0(sp)
+		addi sp, sp, 4
+		;making sure s's remain unchanged
+
 		ret
+		
 		
 		above_neighbours:
 		beq s1, zero, last_line_neighbours
@@ -1119,6 +1160,7 @@ game_of_life:
 		ret
 
 	; END:find_neighbours
+
 
 
 
