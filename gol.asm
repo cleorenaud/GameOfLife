@@ -778,10 +778,10 @@ game_of_life:
 		select_action_init:
 			addi t1, zero, 1 ; t1 will be a mask to check whether a button is pressed
 			add s0, zero, a0 ; s0 = a0, will be used as parameters for update_state
-			add t0, zero, a0 ; t0 = a0
+			add s1, zero, a0 ; s1 = a0
 		
 			s_a_init_b0:
-				and t2, t1, t0 ; t2 = 1 if b0 is pressed. t2 = 0 o/w
+				and t2, t1, s1 ; t2 = 1 if b0 is pressed. t2 = 0 o/w
 				beq t2, zero, s_a_init_b1 ; if b0 isn't pressed we check the other buttons
 
 				; we push the current ra to the stack
@@ -793,26 +793,26 @@ game_of_life:
 				addi sp, sp, 4
 				
 			s_a_init_b1:
-				srli t0, t0, 1 ; we shift a0, this way its LSB is b1
+				srli s1, s1, 1 ; we shift a0, this way its LSB is b1
 				; whether b1 is pressed or not, we just have to update the state
 
 			s_a_init_b2:
-				srli t0, t0, 1 ; we shift a0, this way its LSB is b2
-				and t2, t1, t0 ; t2 = 1 if b2 is pressed. t2 = 0 o/w0
+				srli s1, s1, 1 ; we shift a0, this way its LSB is b2
+				and t2, t1, s1 ; t2 = 1 if b2 is pressed. t2 = 0 o/w0
 				addi a0, zero, 0 ; if b2 isn't pressed we set a2 to 0
 				beq t2, zero, s_a_init_b3 ; if b2 isn't pressed we check the other buttons
 				addi a2, zero, 1 ; if b2 is pressed we set a2 to 1
 
 			s_a_init_b3:
-				srli t0, t0, 1 ; we shift a0, this way its LSB is b3
-				and t2, t1, t0 ; t2 = 1 if b3 is pressed. t2 = 0 o/w0
+				srli s1, s1, 1 ; we shift a0, this way its LSB is b3
+				and t2, t1, s1 ; t2 = 1 if b3 is pressed. t2 = 0 o/w0
 				addi a1, zero, 0 ; if b3 isn't pressed we set a1 to 0
 				beq t2, zero, s_a_init_b4 ; if b3 isn't pressed we check the other buttons
 				addi a1, zero, 1; if b3 is pressed we set a1 to 1
 
 			s_a_init_b4:
-				srli t0, t0, 1 ; we shift a0, this way its LSB is b4
-				and t2, t1, t0 ; t2 = 1 if b4 is pressed. t2 = 0 o/w0
+				srli s1, s1, 1 ; we shift a0, this way its LSB is b4
+				and t2, t1, s1 ; t2 = 1 if b4 is pressed. t2 = 0 o/w0
 				addi a0, zero, 0 ; if b3 isn't pressed we set a0 to 1
 				beq t2, zero, s_a_init_steps ; if b4 isn't pressed we are done
 				addi a0, zero, 1 ; if b4 is pressed we set a0 to 1
@@ -831,10 +831,10 @@ game_of_life:
 
 		select_action_rand:
 			addi t1, zero, 1 ; t1 will be a mask to check whether a button is pressed
-			add t0, zero, a0 ; t0 = a0
+			add s1, zero, a0 ; s1 = a0
 		
 			s_a_rand_b0:
-				and t2, t1, t0 ; t2 = 1 if b0 is pressed. t2 = 0 o/w
+				and t2, t1, s1 ; t2 = 1 if b0 is pressed. t2 = 0 o/w
 				beq t2, zero, s_a_rand_b1 ; if b0 isn't pressed we check the other buttons
 				; we push the current ra to the stack
 				addi sp, sp, -4 
@@ -845,26 +845,26 @@ game_of_life:
 				addi sp, sp, 4
 
 			s_a_rand_b1:
-				srli t0, t0, 1 ; we shift a0, this way its LSB is b1
+				srli s1, s1, 1 ; we shift a0, this way its LSB is b1
 				; whether b1 is pressed ot not, we just have to update the state
 
 			s_a_rand_b2:
-				srli t0, t0, 1 ; we shift a0, this way its LSB is b2
-				and t2, t1, t0 ; t2 = 1 if b2 is pressed. t2 = 0 o/w0
+				srli s1, s1, 1 ; we shift a0, this way its LSB is b2
+				and t2, t1, s1 ; t2 = 1 if b2 is pressed. t2 = 0 o/w0
 				addi a0, zero, 0 ; if b2 isn't pressed we set a2 to 0
 				beq t2, zero, s_a_rand_b3 ; if b2 isn't pressed we check the other buttons
 				addi a2, zero, 1 ; if b2 is pressed we set a2 to 1
 
 			s_a_rand_b3:
-				srli t0, t0, 1 ; we shift a0, this way its LSB is b3
-				and t2, t1, t0 ; t2 = 1 if b3 is pressed. t2 = 0 o/w0
+				srli s1, s1, 1 ; we shift a0, this way its LSB is b3
+				and t2, t1, s1 ; t2 = 1 if b3 is pressed. t2 = 0 o/w0
 				addi a1, zero, 0 ; if b3 isn't pressed we set a1 to 0
 				beq t2, zero, s_a_rand_b4 ; if b3 isn't pressed we check the other buttons
 				addi a1, zero, 1; if b3 is pressed we set a1 to 1
 
 			s_a_rand_b4:
-				srli t0, t0, 1 ; we shift a0, this way its LSB is b4
-				and t2, t1, t0 ; t2 = 1 if b4 is pressed. t2 = 0 o/w0
+				srli s1, s1, 1 ; we shift a0, this way its LSB is b4
+				and t2, t1, s1 ; t2 = 1 if b4 is pressed. t2 = 0 o/w0
 				addi a0, zero, 0 ; if b3 isn't pressed we set a0 to 1
 				beq t2, zero, s_a_rand_steps ; if b4 isn't pressed we are done
 				addi a0, zero, 1 ; if b4 is pressed we set a0 to 1
@@ -882,10 +882,10 @@ game_of_life:
 
 		select_action_run:
 			addi t1, zero, 1 ; t1 will be a mask to check whether a button is pressed
-			add t0, zero, a0 ; t0 = a0
+			add s1, zero, a0 ; s1 = a0
 		
 			s_a_run_b0:
-				and t2, t1, t0 ; t2 = 1 if b0 is pressed. t2 = 0 o/w
+				and t2, t1, s1 ; t2 = 1 if b0 is pressed. t2 = 0 o/w
 				beq t2, zero, s_a_run_b1 ; if b0 isn't pressed we check the other buttons
 				; we push the current ra to the stack
 				addi sp, sp, -4 
@@ -897,8 +897,8 @@ game_of_life:
 				
 
 			s_a_run_b1:
-				srli t0, t0, 1 ; we shift a0, this way its LSB is b1
-				and t2, t1, t0 ; t2 = 1 if b1 is pressed. t2 = 0 o/w0
+				srli s1, s1, 1 ; we shift a0, this way its LSB is b1
+				and t2, t1, s1 ; t2 = 1 if b1 is pressed. t2 = 0 o/w0
 				beq t2, zero, s_a_run_b2 ; if b1 isn't pressed we check the other buttons
 				addi a0, zero, 0 ; a0 = 0 as we will increase the game speed
 				; we push the current ra to the stack
@@ -910,8 +910,8 @@ game_of_life:
 				addi sp, sp, 4
 
 			s_a_run_b2:
-				srli t0, t0, 1 ; we shift a0, this way its LSB is b2
-				and t2, t1, t0 ; t2 = 1 if b2 is pressed. t2 = 0 o/w0
+				srli s1, s1, 1 ; we shift a0, this way its LSB is b2
+				and t2, t1, s1 ; t2 = 1 if b2 is pressed. t2 = 0 o/w0
 				beq t2, zero, s_a_run_b3 ; if b2 isn't pressed we check the other buttons
 				addi a0, zero, 1 ; a0 = 1 as we will decrease the game speed
 				; we push the current ra to the stack
@@ -923,18 +923,18 @@ game_of_life:
 				addi sp, sp, 4
 
 			s_a_run_b3:
-				srli t0, t0, 1 ; we shift a0, this way its LSB is b3
-				and t2, t1, t0 ; t2 = 1 if b3 is pressed. t2 = 0 o/w0
+				srli s1, s1, 1 ; we shift a0, this way its LSB is b3
+				and t2, t1, s1 ; t2 = 1 if b3 is pressed. t2 = 0 o/w0
 				beq t2, zero, s_a_run_b4 ; if b3 isn't pressed we check the other buttons
 
 
 			s_a_run_b4:
-				srli t0, t0, 1 ; we shift a0, this way its LSB is b4
-				and t2, t1, t0 ; t2 = 1 if b4 is pressed. t2 = 0 o/w0
+				srli s1, s1, 1 ; we shift a0, this way its LSB is b4
+				and t2, t1, s1 ; t2 = 1 if b4 is pressed. t2 = 0 o/w0
 				beq t2, zero, select_action_end ; if b4 isn't pressed we are done
 				; if b4 is pressed we remplace the current game with a new random one
-				addi t0, zero, 1
-				stw t0, CURR_STEP(zero)
+				addi s1, zero, 1
+				stw s1, CURR_STEP(zero)
 			
 				
 
@@ -998,25 +998,6 @@ game_of_life:
 
 	; BEGIN:find_neighbours
 	find_neighbours:
-	;making sure s's remain unchanged
-		addi sp, sp, -4
-		stw s0, 0(sp)
-		addi sp, sp, -4
-		stw s1, 0(sp)
-		addi sp, sp, -4
-		stw s2, 0(sp)
-		addi sp, sp, -4
-		stw s3, 0(sp)
-		addi sp, sp, -4
-		stw s4, 0(sp)
-		addi sp, sp, -4
-		stw s5, 0(sp)
-		addi sp, sp, -4
-		stw s6, 0(sp)
-		addi sp, sp, -4
-		stw s7, 0(sp)
-		;making sure s's remain unchanged
-
 		add s7, zero, zero ;neighbours counter
 		add s0, zero, a0 ;x coordinate
 		add s1, zero, a1 ;y coordinate
@@ -1038,7 +1019,7 @@ game_of_life:
 
 		add v0, zero, s7
 		
-		br find_neighbours_end
+		ret
 		
 		above_neighbours:
 		beq s1, zero, last_line_neighbours
@@ -1055,7 +1036,7 @@ game_of_life:
 		ldw ra, 0(sp)
 		addi sp, sp, 4 ;now v0 contains the value of the line
 		add s2, zero, v0
-		br find_neighbours_end
+		ret
 
 		line_neighbours:
 		add a0, zero, s1
@@ -1066,7 +1047,7 @@ game_of_life:
 		ldw ra, 0(sp)
 		addi sp, sp, 4 ;now v0 contains the value of the line
 		add s2, zero, v0
-		br find_neighbours_end
+		ret
 
 		under_neighbours:
 		addi t0, zero, N_GSA_LINES
@@ -1085,7 +1066,7 @@ game_of_life:
 		ldw ra, 0(sp)
 		addi sp, sp, 4 ;now v0 contains the value of the line
 		add s2, zero, v0
-		br find_neighbours_end
+		ret
 
 
 		computing_neighbours:
@@ -1135,30 +1116,11 @@ game_of_life:
 			srli s4, s4, 2
 			add s7, s7, s4
 		
-		br find_neighbours_end
+		ret
 
-		find_neighbours_end:
-			;making sure s's remain unchanged
-			ldw s7, 0(sp)
-			addi sp, sp, 4
-			ldw s6, 0(sp)
-			addi sp, sp, 4
-			ldw s5, 0(sp)
-			addi sp, sp, 4
-			ldw s4, 0(sp)
-			addi sp, sp, 4
-			ldw s3, 0(sp)
-			addi sp, sp, 4
-			ldw s2, 0(sp)
-			addi sp, sp, 4
-			ldw s1, 0(sp)
-			addi sp, sp, 4
-			ldw s0, 0(sp)
-			addi sp, sp, 4
-			;making sure s's remain unchanged
-			
-			ret ; once we are done we can exit the procedure
 	; END:find_neighbours
+
+
 
 
 
@@ -1350,10 +1312,50 @@ game_of_life:
 
 	; BEGIN:get_input
 	get_input:
-		ldw v0, BUTTONS+4 (zero) ; we load the falling edge detection in the return register
-		stw zero, BUTTONS+4 (zero) ; we clear the edgecapture register
+		ldw t0, BUTTONS+4 (zero) ; we load the falling edge detection 
+		addi t1, zero, 1 ; we create a mask
 
-		ret ; once it's done we can return
+		get_input_b0:
+			and t2, t0, t1
+			beq t2, zero, get_input_b1 ; if the LSB isn't active we branch
+			addi v0, zero, 0b00001 ; return value : b0 is active
+			br get_input_end
+
+		get_input_b1:
+			srli t0, t0, 1 ; we shift so that the LSB is b1
+			and t2, t0, t1
+			beq t3, zero, get_input_b2 ; if the LSB isn't active we branch
+			addi v0, zero, 0b00010 ; return value : b1 is active	
+			br get_input_end
+
+		get_input_b2:
+			srli t0, t0, 1 ; we shift so that the LSB is b1
+			and t2, t0, t1
+			beq t3, zero, get_input_b3 ; if the LSB isn't active we branch
+			addi v0, zero, 0b00100 ; return value : b2 is active
+			br get_input_end
+
+		get_input_b3:
+			srli t0, t0, 1 ; we shift so that the LSB is b1
+			and t2, t0, t1
+			beq t3, zero, get_input_b4 ; if the LSB isn't active we branch
+			addi v0, zero, 0b01000 ; return value : b3 is active
+			br get_input_end
+
+		get_input_b4:
+			srli t0, t0, 1 ; we shift so that the LSB is b1
+			and t2, t0, t1
+			beq t3, zero, get_input_no_button ; if the LSB isn't active we branch
+			addi v0, zero, 0b10000 ; return value : b4 is active
+			br get_input_end
+
+		get_input_no_button:
+			addi v0, zero, 0b00000 ; return value : no button is active
+
+		get_input_end:
+			stw zero, BUTTONS+4 (zero) ; we clear the edgecapture register
+
+			ret ; once it's done we can return
 
 	; END:get_input
 
