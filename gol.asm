@@ -1470,8 +1470,8 @@ game_of_life:
 		; the GSA 0 is initialized to the seed 0
 		; we load the seed 0 in our current GSA
 
-		addi s7, zero, 8 ; s7 = 8, the number of time we will run the loop
-		addi s6, zero, 0 ; s6 = 6, we will increment it by 4 at each iteration of the loop
+		addi s7, zero, N_GSA_LINES ; s7 = 8, the number of time we will run the loop
+		addi s6, zero, 0 ; s6 = 0, we will increment it by 4 at each iteration of the loop
 		addi s5, zero, 0 ; s5 = 0, we will increment it at each iteration of the loop
 
 		reset_game_seed_loop:
