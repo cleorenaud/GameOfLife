@@ -134,3 +134,17 @@
 
 	call draw_gsa
 	;We should get the same leds lighting up as in the 3.3.1!!!!
+
+
+
+
+
+; test update_gsa
+	;set stack pointer at adequate value
+	addi sp, zero, CUSTOM_VAR_END
+
+ 	call reset_game
+	addi t0, zero, RUNNING
+	stw t0, PAUSE (zero)
+	call update_gsa
+

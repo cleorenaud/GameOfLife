@@ -971,22 +971,26 @@ game_of_life:
 		addi t1, zero, 3 ;three neighbors
 		addi t2, zero, 2 ;two neighbors
 
-		beq t0, a1, is_alive
+		beq t0, a1, is_alive ; if the cell is alive we branch
+
 		is_dead:
 			;reproduction
-			beq t1, a0, reproduce
+			beq t1, a0, reproduce ; if the cell has 3 neighbours we branch
 			;nope, will be dead
-			add v0, zero, zero
-			ret
-			reproduce:
-				addi v0, zero, 1
-				ret
+			add v0, zero, zero ; return value : the cell is dead
+
+			ret ; once we are done we exit the procedure
+
+		reproduce:
+			addi v0, zero, 1
+			ret ; once we are done we exit the procedure
 
 		is_alive:
-			bltu a0, t2, is_dead ;neighbors < 2 -> dieeeee
+			bltu a0, t2, is_dead ; neighbors < 2 -> dieeeee
 			bltu t1, a0, is_dead ; 3 < neighbors ----> dieeeee
-			addi v0, zero, 1 ;else lives
-			ret
+			addi v0, zero, 1 ; return value : the cell is alive
+			ret ; once we are done we exit the procedure
+
 	; END:cell_fate
 
 
@@ -1185,7 +1189,7 @@ game_of_life:
 		stw ra, 0 (sp)
 
 		addi t0, zero, PAUSED
-		ldw t1, PAUSE (zero) ; t1 is the current pause step
+		ldw t1, PAUSE (zero) ; t1 is the current pause state
 		beq t0, t1, update_gsa_end ; if the game is paused this procedure should do nothing
 
 		addi s7, zero, N_GSA_LINES ; s7 = 8 (number of lines of the GSA)
