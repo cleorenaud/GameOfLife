@@ -724,7 +724,8 @@ game_of_life:
 		ldw s0, CURR_STATE (zero) ; s0 = current state
 		addi s1, a0, 0 ; s1 is the edge_capture
 		cmpeqi t0, s0, RUN ; t0 = 1 if the current state is RUN, o/w t0 = 0 
-		beq t0, zero, select_action_run ; if current state isn't RUN we branch
+		addi t1, zero, 1 ; t1 = 1
+		beq t0, t1, select_action_run ; if current state is RUN we branch
 
 		; else the current state is INIT or RAND (same implementation
 		select_action_init_rand:
@@ -1310,7 +1311,8 @@ game_of_life:
 			stw t3, SEVEN_SEGS+8 (zero) ; we store the value for the SEG[2]
 
 			; we extract the value of the hundreds
-			srli t1, t0, 8
+			slli t1, t0, 20
+			srli t1, t1, 28
 			; we must multiply t1 by 4
 			add t1, t1, t1 
 			add t1, t1, t1
