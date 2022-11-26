@@ -63,7 +63,6 @@ game_of_life:
 
 
 
-
  	; BEGIN:clear_leds
     clear_leds:
         stw zero, LEDS (zero)
@@ -731,6 +730,7 @@ game_of_life:
 		select_action_init_rand:
 			s_a_i_r_b0:
 				andi t0, s1, 1 ; the state of b0
+				beq t0, zero, s_a_i_r_b1 ; if b0 isn't pressed we skip the next step
 				call increment_seed ; we increment the seed
 
 			s_a_i_r_b1:
@@ -739,6 +739,7 @@ game_of_life:
 			s_a_i_r_b2:
 				srli t0, s1, 2 ; t0 LSB is the button 2 state
 				andi t0, t0, 1 ; we only keep the LSB of t0
+				beq t0, zero, s_a_i_r_b3 ; if b1 isn't pressed we skip the next step
 
 				addi a0, zero, 0 ; parameter : b4 isn't pressed
 				addi a1, zero, 0 ; parameter : b3 isn't pressed
@@ -748,6 +749,7 @@ game_of_life:
 			s_a_i_r_b3:
 				srli t0, s1, 3 ; t0 LSB is the button 3 state
 				andi t0, t0, 1 ; we only keep the LSB of t0
+				beq t0, zero, s_a_i_r_b4 ; if b3 isn't pressed we skip the next step
 
 				addi a0, zero, 0 ; parameter : b4 isn't pressed
 				addi a1, zero, 1 ; parameter : b3 is pressed
@@ -757,6 +759,7 @@ game_of_life:
 			s_a_i_r_b4:
 				srli t0, s1, 4 ; t0 LSB is the button 4 state
 				andi t0, t0, 1 ; we only keep the LSB of t0
+				beq t0, zero, s_a_i_r_end ; if b4 isn't pressed we skip the next step
 
 				addi a0, zero, 1 ; parameter : b4 is pressed
 				addi a1, zero, 0 ; parameter : b3 isn't pressed
@@ -769,12 +772,14 @@ game_of_life:
 		select_action_run:		
 			s_a_run_b0:
 				andi t0, s1, 1 ; the state of b0
+				beq t0, zero, s_a_run_b1 ; if b0 isn't pressed we skip the next step
 
 				call pause_game ; we change the playing state of our game
 
 			s_a_run_b1:
 				srli t0, s1, 1 ; t0 LSB is the button 1 state
 				andi t0, t0, 1 ; we only keep the LSB of t0
+				beq t0, zero, s_a_run_b2 ; if b1 isn't pressed we skip the next step
 
 				addi a0, zero, 0 ; parameter : we must increase the speed
 				call change_speed ; we call change_speed we our parameter	
@@ -782,6 +787,7 @@ game_of_life:
 			s_a_run_b2:
 				srli t0, s1, 2 ; t0 LSB is the button 2 state
 				andi t0, t0, 1 ; we only keep the LSB of t0
+				beq t0, zero, s_a_run_b3 ; if b2 isn't pressed we skip the next step
 
 				addi a0, zero, 1 ; parameter : we must decrease the speed
 				call change_speed ; we call change speed with our parameter
@@ -792,6 +798,7 @@ game_of_life:
 			s_a_run_b4:
 				srli t0, s1, 4 ; t0 LSB is the button 4 state
 				andi t0, t0, 1 ; we only keep the LSB of t0
+				beq t0, zero, s_a_run_end ; if b4 isn't pressed we skip the next step
 
 				call random_gsa ; we replace the current game gsa with a random one
 	
@@ -1340,13 +1347,12 @@ game_of_life:
 		stw t0, CURR_STEP (zero) ; we set the current step to 1
 
 		; now we display the current step on the display
-		; we push the current ra to the stack
-		addi sp, sp, -4 
-		stw ra, 0 (sp)
-		call decrement_step
-		; we retrieve the current ra from the stack
-		ldw ra, 0 (sp)
-		addi sp, sp, 4
+		ldw t0, font_data (zero) ; we load the value corresponding to zero
+		stw t0, SEVEN_SEGS (zero) ; SEG[0] is always zero
+		stw t0, SEVEN_SEGS+4 (zero) ; SEG[1] must be zero
+		stw t0, SEVEN_SEGS+8 (zero) ; SEG[2] must be zero 
+		ldw t0, font_data+4 (zero) ; we load the value corresponding to one
+		stw t0, SEVEN_SEGS+12 (zero) ; SEG[3] must be one
 
 		stw zero, SEED (zero) ; we select the seed 0
 
