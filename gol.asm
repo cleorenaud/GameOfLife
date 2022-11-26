@@ -37,8 +37,11 @@ game_of_life:
 	call reset_game 
 	call get_input
 	add s0, v0, zero ; we stock the return value of get_input in s0
+	add s1, zero, zero
 
 	game_of_life_loop:
+		bne s1, zero, game_of_life ; if done != 0 we exit the loop
+
 		add a0, s0, zero ; we push the input value of select_action
 		call select_action 
 
@@ -56,9 +59,7 @@ game_of_life:
 		call get_input
 		add s0, zero, v0
 		
-		beq s1, zero, game_of_life_loop
-
-	ret
+		br game_of_life_loop
 
 
 
