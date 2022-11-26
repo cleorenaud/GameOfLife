@@ -712,220 +712,103 @@ game_of_life:
 	; BEGIN:select_action
 	select_action:
 		;making sure s's remain unchanged
-		addi sp, sp, -4
+		addi sp, sp, -8
 		stw s0, 0(sp)
-		addi sp, sp, -4
 		stw s1, 0(sp)
-		addi sp, sp, -4
-		stw s2, 0(sp)
-		addi sp, sp, -4
-		stw s3, 0(sp)
-		addi sp, sp, -4
-		stw s4, 0(sp)
-		addi sp, sp, -4
-		stw s5, 0(sp)
-		addi sp, sp, -4
-		stw s6, 0(sp)
-		addi sp, sp, -4
-		stw s7, 0(sp)
 		;making sure s's remain unchanged
 
-		ldw t0, CURR_STATE (zero) ; based on the current state, each button doesn't have the same effect
-		
-		select_action_state_chooser:
-			addi t1, zero, INIT ; t1 = INIT
-			beq t0, t1, select_action_init ; we branch if current state is INIT
-	
-			addi t1, zero, RUN ; t1 = RUN
-			beq t0, t1, select_action_run ; we branch if current state is RUN
-	
-			addi t1, zero, RAND ; t1 = RAND
-			beq t0, t1, select_action_rand ; we branch if current state is RAND
-	
-		select_action_init:
-			addi t1, zero, 1 ; t1 will be a mask to check whether a button is pressed
-			add s0, zero, a0 ; s0 = a0, will be used as parameters for update_state
-			add s1, zero, a0 ; s1 = a0
-		
-			s_a_init_b0:
-				and t2, t1, s1 ; t2 = 1 if b0 is pressed. t2 = 0 o/w
-				beq t2, zero, s_a_init_b1 ; if b0 isn't pressed we check the other buttons
+		; we push the current ra to the stack
+		addi sp, sp, -4 
+		stw ra, 0 (sp)
 
-				; we push the current ra to the stack
-				addi sp, sp, -4 
-				stw ra, 0 (sp)
-				call increment_seed ; if the current state is RAND we must re-call increment_seed
-				; we retrieve the current ra from the stack
-				ldw ra, 0 (sp)
-				addi sp, sp, 4
-				
-			s_a_init_b1:
-				srli s1, s1, 1 ; we shift a0, this way its LSB is b1
-				; whether b1 is pressed or not, we just have to update the state
+		ldw s0, CURR_STATE (zero) ; s0 = current state
+		addi s1, a0, 0 ; s1 is the edge_capture
+		cmpeqi t0, s0, RUN ; t0 = 1 if the current state is RUN, o/w t0 = 0 
+		beq t0, zero, select_action_run ; if current state isn't RUN we branch
 
-			s_a_init_b2:
-				srli s1, s1, 1 ; we shift a0, this way its LSB is b2
-				and t2, t1, s1 ; t2 = 1 if b2 is pressed. t2 = 0 o/w0
-				addi a0, zero, 0 ; if b2 isn't pressed we set a2 to 0
-				beq t2, zero, s_a_init_b3 ; if b2 isn't pressed we check the other buttons
-				addi a2, zero, 1 ; if b2 is pressed we set a2 to 1
+		; else the current state is INIT or RAND (same implementation
+		select_action_init_rand:
+			s_a_i_r_b0:
+				andi t0, s1, 1 ; the state of b0
+				call increment_seed ; we increment the seed
 
-			s_a_init_b3:
-				srli s1, s1, 1 ; we shift a0, this way its LSB is b3
-				and t2, t1, s1 ; t2 = 1 if b3 is pressed. t2 = 0 o/w0
-				addi a1, zero, 0 ; if b3 isn't pressed we set a1 to 0
-				beq t2, zero, s_a_init_b4 ; if b3 isn't pressed we check the other buttons
-				addi a1, zero, 1; if b3 is pressed we set a1 to 1
+			s_a_i_r_b1:
+				; we do nothing as update_state takes care of this part
 
-			s_a_init_b4:
-				srli s1, s1, 1 ; we shift a0, this way its LSB is b4
-				and t2, t1, s1 ; t2 = 1 if b4 is pressed. t2 = 0 o/w0
-				addi a0, zero, 0 ; if b3 isn't pressed we set a0 to 1
-				beq t2, zero, s_a_init_steps ; if b4 isn't pressed we are done
-				addi a0, zero, 1 ; if b4 is pressed we set a0 to 1
+			s_a_i_r_b2:
+				srli t0, s1, 2 ; t0 LSB is the button 2 state
+				andi t0, t0, 1 ; we only keep the LSB of t0
 
-			s_a_init_steps:
-				; we push the current ra to the stack
-				addi sp, sp, -4 
-				stw ra, 0 (sp)
-				call change_steps ; we call change_steps 
-				; we retrieve the current ra from the stack
-				ldw ra, 0 (sp)
-				addi sp, sp, 4
+				addi a0, zero, 0 ; parameter : b4 isn't pressed
+				addi a1, zero, 0 ; parameter : b3 isn't pressed
+				addi a2, zero, 1 ; parameter : b2 is pressed
+				call change_steps ; we call change_steps with our parameters
 
-				br select_action_end
-			
+			s_a_i_r_b3:
+				srli t0, s1, 3 ; t0 LSB is the button 3 state
+				andi t0, t0, 1 ; we only keep the LSB of t0
 
-		select_action_rand:
-			addi t1, zero, 1 ; t1 will be a mask to check whether a button is pressed
-			add s1, zero, a0 ; s1 = a0
-		
-			s_a_rand_b0:
-				and t2, t1, s1 ; t2 = 1 if b0 is pressed. t2 = 0 o/w
-				beq t2, zero, s_a_rand_b1 ; if b0 isn't pressed we check the other buttons
-				; we push the current ra to the stack
-				addi sp, sp, -4 
-				stw ra, 0 (sp)
-				call increment_seed ; if b0 is pressed we increment the seed
-				; we retrieve the current ra from the stack
-				ldw ra, 0 (sp)
-				addi sp, sp, 4
+				addi a0, zero, 0 ; parameter : b4 isn't pressed
+				addi a1, zero, 1 ; parameter : b3 is pressed
+				addi a2, zero, 0 ; parameter : b2 isn't pressed
+				call change_steps ; we call change_steps with our parameters
 
-			s_a_rand_b1:
-				srli s1, s1, 1 ; we shift a0, this way its LSB is b1
-				; whether b1 is pressed ot not, we just have to update the state
+			s_a_i_r_b4:
+				srli t0, s1, 4 ; t0 LSB is the button 4 state
+				andi t0, t0, 1 ; we only keep the LSB of t0
 
-			s_a_rand_b2:
-				srli s1, s1, 1 ; we shift a0, this way its LSB is b2
-				and t2, t1, s1 ; t2 = 1 if b2 is pressed. t2 = 0 o/w0
-				addi a0, zero, 0 ; if b2 isn't pressed we set a2 to 0
-				beq t2, zero, s_a_rand_b3 ; if b2 isn't pressed we check the other buttons
-				addi a2, zero, 1 ; if b2 is pressed we set a2 to 1
+				addi a0, zero, 1 ; parameter : b4 is pressed
+				addi a1, zero, 0 ; parameter : b3 isn't pressed
+				addi a2, zero, 0 ; parameter : b2 isn't pressed
+				call change_steps ; we call change_steps with our parameters
 
-			s_a_rand_b3:
-				srli s1, s1, 1 ; we shift a0, this way its LSB is b3
-				and t2, t1, s1 ; t2 = 1 if b3 is pressed. t2 = 0 o/w0
-				addi a1, zero, 0 ; if b3 isn't pressed we set a1 to 0
-				beq t2, zero, s_a_rand_b4 ; if b3 isn't pressed we check the other buttons
-				addi a1, zero, 1; if b3 is pressed we set a1 to 1
+			s_a_i_r_end:
+				br select_action_end ; once we iterated on each button we branch
 
-			s_a_rand_b4:
-				srli s1, s1, 1 ; we shift a0, this way its LSB is b4
-				and t2, t1, s1 ; t2 = 1 if b4 is pressed. t2 = 0 o/w0
-				addi a0, zero, 0 ; if b3 isn't pressed we set a0 to 1
-				beq t2, zero, s_a_rand_steps ; if b4 isn't pressed we are done
-				addi a0, zero, 1 ; if b4 is pressed we set a0 to 1
-
-			s_a_rand_steps:
-				; we push the current ra to the stack
-				addi sp, sp, -4 
-				stw ra, 0 (sp)
-				call change_steps ; we call change_steps 
-				; we retrieve the current ra from the stack
-				ldw ra, 0 (sp)
-				addi sp, sp, 4
-				
-				br select_action_end 
-
-		select_action_run:
-			addi t1, zero, 1 ; t1 will be a mask to check whether a button is pressed
-			add s1, zero, a0 ; s1 = a0
-		
+		select_action_run:		
 			s_a_run_b0:
-				and t2, t1, s1 ; t2 = 1 if b0 is pressed. t2 = 0 o/w
-				beq t2, zero, s_a_run_b1 ; if b0 isn't pressed we check the other buttons
-				; we push the current ra to the stack
-				addi sp, sp, -4 
-				stw ra, 0 (sp)
-				call pause_game ; if b0 is pressed we call pause_game
-				; we retrieve the current ra from the stack
-				ldw ra, 0 (sp)
-				addi sp, sp, 4
-				
+				andi t0, s1, 1 ; the state of b0
+
+				call pause_game ; we change the playing state of our game
 
 			s_a_run_b1:
-				srli s1, s1, 1 ; we shift a0, this way its LSB is b1
-				and t2, t1, s1 ; t2 = 1 if b1 is pressed. t2 = 0 o/w0
-				beq t2, zero, s_a_run_b2 ; if b1 isn't pressed we check the other buttons
-				addi a0, zero, 0 ; a0 = 0 as we will increase the game speed
-				; we push the current ra to the stack
-				addi sp, sp, -4 
-				stw ra, 0 (sp)
-				call change_speed ; if b1 is pressed we increase the game speed
-				; we retrieve the current ra from the stack
-				ldw ra, 0 (sp)
-				addi sp, sp, 4
+				srli t0, s1, 1 ; t0 LSB is the button 1 state
+				andi t0, t0, 1 ; we only keep the LSB of t0
+
+				addi a0, zero, 0 ; parameter : we must increase the speed
+				call change_speed ; we call change_speed we our parameter	
 
 			s_a_run_b2:
-				srli s1, s1, 1 ; we shift a0, this way its LSB is b2
-				and t2, t1, s1 ; t2 = 1 if b2 is pressed. t2 = 0 o/w0
-				beq t2, zero, s_a_run_b3 ; if b2 isn't pressed we check the other buttons
-				addi a0, zero, 1 ; a0 = 1 as we will decrease the game speed
-				; we push the current ra to the stack
-				addi sp, sp, -4 
-				stw ra, 0 (sp)
-				call change_speed ; if b2 is pressed we decrease the game speed
-				; we retrieve the current ra from the stack
-				ldw ra, 0 (sp)
-				addi sp, sp, 4
+				srli t0, s1, 2 ; t0 LSB is the button 2 state
+				andi t0, t0, 1 ; we only keep the LSB of t0
+
+				addi a0, zero, 1 ; parameter : we must decrease the speed
+				call change_speed ; we call change speed with our parameter
 
 			s_a_run_b3:
-				srli s1, s1, 1 ; we shift a0, this way its LSB is b3
-				and t2, t1, s1 ; t2 = 1 if b3 is pressed. t2 = 0 o/w0
-				beq t2, zero, s_a_run_b4 ; if b3 isn't pressed we check the other buttons
-
+				; we do nothing as update_state takes care of this part
 
 			s_a_run_b4:
-				srli s1, s1, 1 ; we shift a0, this way its LSB is b4
-				and t2, t1, s1 ; t2 = 1 if b4 is pressed. t2 = 0 o/w0
-				beq t2, zero, select_action_end ; if b4 isn't pressed we are done
-				; if b4 is pressed we remplace the current game with a new random one
-				addi s1, zero, 1
-				stw s1, CURR_STEP(zero)
-			
-				
+				srli t0, s1, 4 ; t0 LSB is the button 4 state
+				andi t0, t0, 1 ; we only keep the LSB of t0
+
+				call random_gsa ; we replace the current game gsa with a random one
+	
+			s_a_run_end:
+				br select_action_end ; once we iterated on each button we branch
 
 		select_action_end:
+			; we retrieve the current ra from the stack
+			ldw ra, 0 (sp)
+			addi sp, sp, 4
+	
 			;making sure s's remain unchanged
-			ldw s7, 0(sp)
-			addi sp, sp, 4
-			ldw s6, 0(sp)
-			addi sp, sp, 4
-			ldw s5, 0(sp)
-			addi sp, sp, 4
-			ldw s4, 0(sp)
-			addi sp, sp, 4
-			ldw s3, 0(sp)
-			addi sp, sp, 4
-			ldw s2, 0(sp)
-			addi sp, sp, 4
 			ldw s1, 0(sp)
-			addi sp, sp, 4
 			ldw s0, 0(sp)
-			addi sp, sp, 4
+			addi sp, sp, 8
 			;making sure s's remain unchanged
 
-			ret
+			ret ; once we are done we can exit the procedure
 	
 	; END:select_action
 
