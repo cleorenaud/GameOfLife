@@ -37,11 +37,8 @@ game_of_life:
 	call reset_game 
 	call get_input
 	add s0, v0, zero ; we stock the return value of get_input in s0
-	add s1, zero, zero
 
 	game_of_life_loop:
-		bne s1, zero, game_of_life ; if done != 0 we exit the loop
-
 		add a0, s0, zero ; we push the input value of select_action
 		call select_action 
 
@@ -59,7 +56,9 @@ game_of_life:
 		call get_input
 		add s0, zero, v0
 		
-		br game_of_life_loop
+		beq s1, zero, game_of_life_loop
+
+	ret
 
 
 
@@ -642,99 +641,67 @@ game_of_life:
 	; BEGIN:update_state
 	update_state:
 		;making sure s's remain unchanged
-		addi sp, sp, -4
+		addi sp, sp, -8
 		stw s0, 0(sp)
-		addi sp, sp, -4
 		stw s1, 0(sp)
-		addi sp, sp, -4
-		stw s2, 0(sp)
-		addi sp, sp, -4
-		stw s3, 0(sp)
-		addi sp, sp, -4
-		stw s4, 0(sp)
-		addi sp, sp, -4
-		stw s5, 0(sp)
-		addi sp, sp, -4
-		stw s6, 0(sp)
-		addi sp, sp, -4
-		stw s7, 0(sp)
 		;making sure s's remain unchanged
 
-		ldw s0, CURR_STATE (zero) ; t0 = current state
+		ldw s0, CURR_STATE (zero) ; s0 = current state
+		addi s1, a0, 0 ; s1 is the edgecapture
 			
-		; first we will check whether b1 = 1 (if it's the case then next state is RUN)
-		addi s7, zero, 1 ; we create a mask
-		srli s6, a0, 1 ; the LSB of t6 is the value of b1
-		and s7, s7, s6 ; if the LSB is 1 then s7 = 1 o/w s7 = 0
-		beq s7, zero, update_state_chooser ; if s7 = 0 then we test other options (based on the current state)
-		addi s1, zero, RUN ; if s7 = 1 then the new state is RUN
-		addi s2, zero, RUNNING
-		stw s2, PAUSE (zero) ; we put the game in running state
-		br update_state_end
+		update_state_case1:
+			; first we will check whether b1 is pressed and current_state != RUN
+			cmpnei t0, s0, RUN ; t0 = 1 if current state isn't RUN, o/w t0 = 0
+			srli t1, s1, 1 ; t1 LSB is the button 1 state
+			andi t1, t1, 1 ; we only keep the LSB of t1
+			and t0, t0, t1 ; t0 = 1 if b1 is pressed AND current state isn't RUN, o/w t0 = 0
+			beq t0, zero, update_state_case2 ; if the condition isn't respected we branch
 
-		update_state_chooser:
-			addi s1, zero, INIT
-			beq s0, s1, update_state_init ; we branch if current state is INIT
-	
-			addi s1, zero, RUN
-			beq s0, s1, update_state_run ; we branch if current state is RUN
-	
-			addi s1, zero, RAND
-			beq s0, s1, update_state_end ; all cases for when the current state is RAND are already covered
+			; else the current state become run and we need to unpause the game
+			addi t0, zero, RUN ; t0 = RUN
+			stw t0, CURR_STATE (zero) ; current state become RUN
+			addi t0, zero, RUNNING ; t0 = RUNNING
+			stw t0, PAUSE (zero) ; the game is running
 
-			update_state_run: ; when the current state is RUN		
-			; check value of the button 3
-			addi s7, zero, 1 ; we create a mask
-			srli s6, a0, 3 ; the LSB of t6 is the value of b3
-			and s7, s7, s6 ; if the LSB is 1 then s7 = 1 o/w s7 = 0
-			beq s7, zero, update_state_end ; if s7 = 0 then the current state won't change
+		update_state_case2:
+			; now we check whether b0 is pressed and current state = INIT
+			cmpeqi t0, s0, INIT ; t0 = 1 if current state is INIT, o/w t0 = 0
+			andi t1, s1, 1 ; we only keep the input of b0 (which is the LSB)
+			and t0, t0, t1 ; t0 = 1 if b0 is pressed AND current state is INIT, o/w t0 = 0
+			ldw t2, SEED (zero) ; t2 = current seed N
+			cmpeqi t2, t2, N_SEEDS ; t2 = 1 if N = N_SEEDS, o/w t2 = 0
+			and t0, t0, t2 ; t0 = 1 if N = N_SEEDS AND b0 is pressed AND current state is INIT, o/w t0 = 0
+			beq t0, zero, update_state_case3 ; if the condition isn't respected we branch
+
+			; else the current state become RAND
+			addi t0, zero, RAND ; t0 = RAND
+			stw t0, CURR_STATE (zero) ; current state become RAND
+
+		update_state_case3:
+			; finally we check whether b3 is pressed and current state = RUN
+			cmpeqi t0, s0, RUN ; t0 = 1 if current state is RUN, o/w t0 = 0
+			srli t1, s1, 3 ; t1 LSB is the button 3 state
+			andi t1, t1, 1 ; we only keep the LSB of t1
+			and t0, t0, t1 ; t0 = 1 if b3 is pressed AND current state is RUN
+			beq t0, zero, update_state_end ; if the condition isn't respected we branch
+			
+			; else we must reset the game
 			; we push the current ra to the stack
 			addi sp, sp, -4 
 			stw ra, 0 (sp)
-			call reset_game ; we call reset_game
+			call reset_game
 			; we retrieve the current ra from the stack
 			ldw ra, 0 (sp)
 			addi sp, sp, 4
-			
-			br update_state_end
-		
-		update_state_init: ; when the current state is INIT
-			; first we check whether b0 is active
-			addi s7, zero, 1 ; we create a mask
-			and s7, s7, a0 ; if the LSB is 1 then s7 = 1 o/w s7 = 0
-			beq s7, zero, update_state_end ; if s7 = 0 then the current state won't change
-
-			; if b0 + 1 = N_SEEDS the next state is RAND o/w we do not change
-			ldw s6, SEED (zero) ; s6 = N
-			cmpeqi s7, s6, N_SEEDS ; s7 = 1 if N = N_SEEDS, o/w s7 = 0
-			beq s7, zero, update_state_end ; if s7 = 0 we don't change the current state
-		
-			addi s1, zero, RAND	; if s7 = 1 then the new state is RAND
-			br update_state_end
 
 		update_state_end:
-			stw s1, CURR_STATE (zero) ; we stock the new current state
-
 			;making sure s's remain unchanged
-			ldw s7, 0(sp)
-			addi sp, sp, 4
-			ldw s6, 0(sp)
-			addi sp, sp, 4
-			ldw s5, 0(sp)
-			addi sp, sp, 4
-			ldw s4, 0(sp)
-			addi sp, sp, 4
-			ldw s3, 0(sp)
-			addi sp, sp, 4
-			ldw s2, 0(sp)
-			addi sp, sp, 4
 			ldw s1, 0(sp)
-			addi sp, sp, 4
 			ldw s0, 0(sp)
-			addi sp, sp, 4
+			addi sp, sp, 8
 			;making sure s's remain unchanged
 
-			ret
+			ret ; once we are done we can exit the procedure
 
 	; END:update_state
 
@@ -1476,29 +1443,19 @@ game_of_life:
 	; BEGIN:reset_game
 	reset_game:
 		;making sure s's remain unchanged
-		addi sp, sp, -4
-		stw s0, 0(sp)
-		addi sp, sp, -4
-		stw s1, 0(sp)
-		addi sp, sp, -4
-		stw s2, 0(sp)
-		addi sp, sp, -4
-		stw s3, 0(sp)
-		addi sp, sp, -4
-		stw s4, 0(sp)
-		addi sp, sp, -4
+		addi sp, sp, -12
 		stw s5, 0(sp)
-		addi sp, sp, -4
 		stw s6, 0(sp)
-		addi sp, sp, -4
 		stw s7, 0(sp)
 		;making sure s's remain unchanged
 
-		addi s0, zero, 1 ; s0 = 1
-		stw s0, CURR_STEP (zero) ; we set the current step to 1
+		addi t0, zero, INIT
+		stw t0, CURR_STATE (zero) ; we put the current state to 0
+
+		addi t0, zero, 1 ; s0 = 1
+		stw t0, CURR_STEP (zero) ; we set the current step to 1
 
 		; now we display the current step on the display
-
 		; we push the current ra to the stack
 		addi sp, sp, -4 
 		stw ra, 0 (sp)
@@ -1554,21 +1511,9 @@ game_of_life:
 
 		;making sure s's remain unchanged
 		ldw s7, 0(sp)
-		addi sp, sp, 4
 		ldw s6, 0(sp)
-		addi sp, sp, 4
 		ldw s5, 0(sp)
-		addi sp, sp, 4
-		ldw s4, 0(sp)
-		addi sp, sp, 4
-		ldw s3, 0(sp)
-		addi sp, sp, 4
-		ldw s2, 0(sp)
-		addi sp, sp, 4
-		ldw s1, 0(sp)
-		addi sp, sp, 4
-		ldw s0, 0(sp)
-		addi sp, sp, 4
+		addi sp, sp, 12
 		;making sure s's remain unchanged
 		
 		ret ; once we are done we return
