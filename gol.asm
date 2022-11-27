@@ -341,11 +341,13 @@ game_of_life:
 			add a0, zero, zero
 			add a1, zero, zero
 			addi s0, zero, 1 ;used to mask
-			add s2, zero, zero ;used to iterate over x
+			
 			addi s3, zero, N_GSA_COLUMNS ;max value of x
 			addi s5, zero, N_GSA_LINES
 			
 			random_y_loop:
+				add a0, zero, zero
+				add s2, zero, zero ;used to iterate over x
 				random_x_loop:
 					ldw s1, RANDOM_NUM (zero)
 					and s4, s0, s1
@@ -1113,6 +1115,26 @@ game_of_life:
 
 	; BEGIN:mask
 	mask:
+		;making sure s's remain unchanged
+		addi sp, sp, -4
+		stw s0, 0(sp)
+		addi sp, sp, -4
+		stw s1, 0(sp)
+		addi sp, sp, -4
+		stw s2, 0(sp)
+		addi sp, sp, -4
+		stw s3, 0(sp)
+		addi sp, sp, -4
+		stw s4, 0(sp)
+		addi sp, sp, -4
+		stw s5, 0(sp)
+		addi sp, sp, -4
+		stw s6, 0(sp)
+		addi sp, sp, -4
+		stw s7, 0(sp)
+		;making sure s's remain unchanged
+
+
 		;we apply corresponding mask to the gsa
 		add t0, zero, zero
 		addi t1, zero, 1
@@ -1177,6 +1199,25 @@ game_of_life:
 		addi s1, s1, 1
 
 		bltu s1, s5, apply_masks
+
+		;making sure s's remain unchanged
+		ldw s7, 0(sp)
+		addi sp, sp, 4
+		ldw s6, 0(sp)
+		addi sp, sp, 4
+		ldw s5, 0(sp)
+		addi sp, sp, 4
+		ldw s4, 0(sp)
+		addi sp, sp, 4
+		ldw s3, 0(sp)
+		addi sp, sp, 4
+		ldw s2, 0(sp)
+		addi sp, sp, 4
+		ldw s1, 0(sp)
+		addi sp, sp, 4
+		ldw s0, 0(sp)
+		addi sp, sp, 4
+		;making sure s's remain unchanged
 
 		ret
 
