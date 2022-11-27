@@ -1029,21 +1029,9 @@ game_of_life:
 	; BEGIN:update_gsa
 	update_gsa:
 		;making sure s's remain unchanged
-		addi sp, sp, -4
-		stw s0, 0(sp)
-		addi sp, sp, -4
-		stw s1, 0(sp)
-		addi sp, sp, -4
-		stw s2, 0(sp)
-		addi sp, sp, -4
-		stw s3, 0(sp)
-		addi sp, sp, -4
-		stw s4, 0(sp)
-		addi sp, sp, -4
+		addi sp, sp, -12
 		stw s5, 0(sp)
-		addi sp, sp, -4
 		stw s6, 0(sp)
-		addi sp, sp, -4
 		stw s7, 0(sp)
 		;making sure s's remain unchanged
 
@@ -1060,7 +1048,7 @@ game_of_life:
 		update_gsa_y_loop: 
 			addi s7, s7, -1 ; we decrement our counter
 			add a0, s7, zero ; the parameter of get_gsa
-			call get_gsa
+			call get_gsa ; we get the line corresponding to s7
 
 			addi s6, zero, N_GSA_COLUMNS
 			addi s5, zero, 0 ; will be used as the line for the gsa
@@ -1111,21 +1099,9 @@ game_of_life:
 
 			;making sure s's remain unchanged
 			ldw s7, 0(sp)
-			addi sp, sp, 4
 			ldw s6, 0(sp)
-			addi sp, sp, 4
 			ldw s5, 0(sp)
-			addi sp, sp, 4
-			ldw s4, 0(sp)
-			addi sp, sp, 4
-			ldw s3, 0(sp)
-			addi sp, sp, 4
-			ldw s2, 0(sp)
-			addi sp, sp, 4
-			ldw s1, 0(sp)
-			addi sp, sp, 4
-			ldw s0, 0(sp)
-			addi sp, sp, 4
+			addi sp, sp, 12
 			;making sure s's remain unchanged
 
 			ret ; once we are done we return		
