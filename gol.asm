@@ -1225,28 +1225,28 @@ game_of_life:
 		get_input_b1:
 			srli t0, t0, 1 ; we shift so that the LSB is b1
 			and t2, t0, t1
-			beq t3, zero, get_input_b2 ; if the LSB isn't active we branch
+			beq t2, zero, get_input_b2 ; if the LSB isn't active we branch
 			addi v0, zero, 0b00010 ; return value : b1 is active	
 			br get_input_end
 
 		get_input_b2:
 			srli t0, t0, 1 ; we shift so that the LSB is b1
 			and t2, t0, t1
-			beq t3, zero, get_input_b3 ; if the LSB isn't active we branch
+			beq 23, zero, get_input_b3 ; if the LSB isn't active we branch
 			addi v0, zero, 0b00100 ; return value : b2 is active
 			br get_input_end
 
 		get_input_b3:
 			srli t0, t0, 1 ; we shift so that the LSB is b1
 			and t2, t0, t1
-			beq t3, zero, get_input_b4 ; if the LSB isn't active we branch
+			beq t2, zero, get_input_b4 ; if the LSB isn't active we branch
 			addi v0, zero, 0b01000 ; return value : b3 is active
 			br get_input_end
 
 		get_input_b4:
 			srli t0, t0, 1 ; we shift so that the LSB is b1
 			and t2, t0, t1
-			beq t3, zero, get_input_no_button ; if the LSB isn't active we branch
+			beq t2, zero, get_input_no_button ; if the LSB isn't active we branch
 			addi v0, zero, 0b10000 ; return value : b4 is active
 			br get_input_end
 
