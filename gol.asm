@@ -29,6 +29,24 @@
     .equ RUNNING, 0x01
 
 main:
+	;set stack pointer at adequate value
+	addi sp, zero, CUSTOM_VAR_END
+
+	addi t0, zero, RUN
+	stw t0, CURR_STATE (zero)
+
+	addi t0, zero, MIN_SPEED
+	stw t0, SPEED (zero)
+
+	addi t0, zero, RUNNING
+	stw t0, PAUSE (zero)
+
+	call get_input
+	add s0, v0, zero ; s0 = edgecapture
+	add a0, s0, zero ; parameter : the edgecapture
+	call select_action 
+	
+	
 ; algorithm to run the game of life
 game_of_life:
 	;set stack pointer at adequate value
