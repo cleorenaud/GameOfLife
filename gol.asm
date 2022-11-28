@@ -51,7 +51,7 @@ game_of_life:
 		call update_gsa
 		call mask
 		call draw_gsa
-		;call wait
+		call wait
 
 		call decrement_step
 		add s1, zero, v0 ; we stock the return value of decrement_step in s1
