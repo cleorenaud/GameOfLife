@@ -396,25 +396,31 @@ game_of_life:
 
 	; BEGIN:change_speed
 	change_speed:
-			ldw t0, SPEED (zero)
-			addi t1, zero, MIN_SPEED ; min value for speed, also used as reference for #1 value
-			addi t2, zero, MAX_SPEED ; max value for speed
+			addi t0, zero, 2
+			bge a0, t0, change_speed_end ; if a0 >= 2 we do nothing
+			
+			ldw t1, SPEED (zero) ; t1 = current speed
+			beq a0, zero, increment ; if a0 = 0 we increment the current step
 
-			beq a0, zero, increment ; if the paramater is zero we increment, else we decrement
-
+			; else we decrement the current step
 			decrement:
-				addi t0, t0, -1 ; we decrement our current speed by one
-				blt t0, t1, increment ; if actual speed < MIN_SPEED we increment it 
-				br store_speed ; else we can store the new value
+				addi t0, zero, MIN_SPEED ; t0 = MIN_SPEED (=1)
+				beq t1, t0, change_speed_end ; if current speed is 1 we do not decrement
+				addi t0, t1, -1 ; else we decrement the current speed
+				br store_speed ; we store the new speed
 
 			increment:
-				addi t0, t0, 1 ; we increment the current speed by one
-				blt t2, t0, decrement ;if MAX_SPEED < actual speed we decrement it
-				br store_speed ; else we can store the new value
-
+				addi t0, zero, MAX_SPEED ; t0 = MAX_SPEED (=10)
+				beq t1, t0, change_speed_end ; if current speed is 10 we do not increment
+				addi t0, t1, 1 ; else we increment the current speed
+				br store_speed ; we store the new speed
+	
 			store_speed:
 				stw t0, SPEED (zero) ; we store the new value
+
+			change_speed_end:
 				ret
+
 	; END:change_speed
 
 
@@ -1304,10 +1310,15 @@ game_of_life:
 	; BEGIN:decrement_step
 	decrement_step:
 		ldw t0, CURR_STATE (zero) ; we load the current state
-		addi t1, zero, RUN ; t1 = 2 (RUN state)
 
-		bne t0, t1, decrement_step_display ; if the current state is not RUN we branch
+		cmpeqi t1, t0, RUN ; t1 = 1 if current_state is RUN, o/w t1 = 0
+		ldw t2, PAUSE (zero) ; we load the current pause state
+		cmpeqi t2, t2, RUNNING ; t2 = 1 if the game is running, o/w t2 = 0
+		and t1, t1, t2 ; t1 = 1 if the game is running AND the current state is RUN, o/w t1 = 0
+		
+		beq t1, zero, decrement_step_display ; if the condition isn't respected we branch
 
+		; else we decrement 
 		ldw t0, CURR_STEP (zero) ; we load the current step
 	
 		beq t0, zero, decrement_step_zero ; if the current step is zero we branch
