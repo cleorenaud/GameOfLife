@@ -397,21 +397,24 @@ game_of_life:
 	; BEGIN:change_speed
 	change_speed:
 			ldw t0, SPEED (zero)
-			addi t1, zero, MIN_SPEED ;min value for speed, also used as reference for #1 value
+			addi t1, zero, MIN_SPEED ; min value for speed, also used as reference for #1 value
 			addi t2, zero, MAX_SPEED ; max value for speed
 
-			beq a0, t1, decrement
-			increment:
-				add t0, t0, t1 ;compute new value for speed
-				bge t2, t0, store_speed ;10>=actual_speed we store the speed value, else we will decrement it
+			beq a0, zero, increment ; if the paramater is zero we increment, else we decrement
 
 			decrement:
-				sub t0, t0, t1 ;compute new value for speed
-				blt t0, t1, increment ; if actual_speed < 1 we increment
+				addi t0, t0, -1 ; we decrement our current speed by one
+				blt t0, t1, increment ; if actual speed < MIN_SPEED we increment it 
+				br store_speed ; else we can store the new value
+
+			increment:
+				addi t0, t0, 1 ; we increment the current speed by one
+				blt t2, t0, decrement ;if MAX_SPEED < actual speed we decrement it
+				br store_speed ; else we can store the new value
 
 			store_speed:
-				stw t0, SPEED (zero)
-			ret
+				stw t0, SPEED (zero) ; we store the new value
+				ret
 	; END:change_speed
 
 
@@ -732,11 +735,12 @@ game_of_life:
 		addi t1, zero, 1 ; t1 = 1
 		beq t0, t1, select_action_run ; if current state is RUN we branch
 
-		; else the current state is INIT or RAND (same implementation
+		; else the current state is INIT or RAND (same implementation)
 		select_action_init_rand:
 			s_a_i_r_b0:
 				andi t0, s1, 1 ; the state of b0
 				beq t0, zero, s_a_i_r_b1 ; if b0 isn't pressed we skip to the next step
+				
 				call increment_seed ; we increment the seed
 
 			s_a_i_r_b1:
@@ -1036,6 +1040,10 @@ game_of_life:
 	update_gsa:
 		;making sure s's remain unchanged
 		addi sp, sp, -4
+		stw s0, 0(sp)
+		addi sp, sp, -4
+		stw s1, 0(sp)
+		addi sp, sp, -4
 		stw s5, 0(sp)
 		addi sp, sp, -4
 		stw s6, 0(sp)
@@ -1051,11 +1059,16 @@ game_of_life:
 		ldw t1, PAUSE (zero) ; t1 is the current pause state
 		beq t0, t1, update_gsa_end ; if the game is paused this procedure should do nothing
 
+		ldw s0, GSA_ID (zero) ; s0 is the current gsa id
+		xori s1, s0, 1 ; s1 is the other gsa id
+
 		addi s7, zero, N_GSA_LINES ; s7 = 8 (number of lines of the GSA)
 
 		update_gsa_y_loop: 
 			addi s7, s7, -1 ; we decrement our counter
-			add a0, s7, zero ; the parameter of get_gsa
+			stw s0, GSA_ID (zero) ; we set the gsa id to the current one
+
+			add a0, s7, zero ; we put the parameter of get_gsa to 0
 			call get_gsa ; we get the line corresponding to s7
 
 			addi s6, zero, N_GSA_COLUMNS
@@ -1064,19 +1077,15 @@ game_of_life:
 
 			update_gsa_x_loop_end:
 				; we must change the current gsa id 
-				ldw t0, GSA_ID (zero)
-				xor t0, t0, t0 ; t0 = !t0
-				stw t0, GSA_ID (zero)
+				ldw s1, GSA_ID (zero)
 				
 				addi a0, s5, 0 ; parameter: the line
 				addi a1, s7, 0 ; parameter: the y-coordinate 
 				call set_gsa
 
 				; and now we must revert it
-				ldw t0, GSA_ID (zero)
-				xor t0, t0, t0 ; t0 = !t0
-				stw t0, GSA_ID (zero)
-		
+				ldw s0, GSA_ID (zero)
+
 			beq s7, zero, update_gsa_y_loop_end ; if the counter is zero we exit the loop
 			br update_gsa_y_loop ; else we countinue looping
 
@@ -1088,17 +1097,15 @@ game_of_life:
 			addi a0, v0, 0 ; parameter: the number of living neighbours
 			addi a1, v1, 0 ; parameter: the (x, y) cell state 
 			call cell_fate
-			srl t0, v0, s6 ; we shift the return value 
-			add s5, s6, s5 ; we add the new value 
+			sll t0, v0, s6 ; we shift the return value 
+			or s5, s5, t0 ; we add the new value 
 			
 			beq s6, zero, update_gsa_x_loop_end ; if the counter is 0 we exit the loop
 			br update_gsa_x_loop ; else we continue looping
 		
 		update_gsa_y_loop_end:
 			; we must change the current gsa id 
-			ldw t0, GSA_ID (zero)
-			xor t0, t0, t0 ; t0 = !t0
-			stw t0, GSA_ID (zero)	
+			ldw s1, GSA_ID (zero)	
 
 		update_gsa_end:
 			; we retrieve the current ra from the stack
@@ -1111,6 +1118,10 @@ game_of_life:
 			ldw s6, 0(sp)
 			addi sp, sp, 4
 			ldw s5, 0(sp)
+			addi sp, sp, 4
+			ldw s1, 0(sp)
+			addi sp, sp, 4
+			ldw s0, 0(sp)
 			addi sp, sp, 4
 			;making sure s's remain unchanged
 
