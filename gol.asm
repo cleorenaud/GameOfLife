@@ -36,16 +36,16 @@ game_of_life:
 
 	call reset_game 
 	call get_input
-	add s0, v0, zero ; we stock the return value of get_input in s0
-	add s1, zero, zero
+	add s0, v0, zero ; s0 = edgecapture
+	add s1, zero, zero ; s1 = done
 
 	game_of_life_loop:
 		bne s1, zero, game_of_life ; if done != 0 we exit the loop
 
-		add a0, s0, zero ; we push the input value of select_action
+		add a0, s0, zero ; parameter : the edgecapture
 		call select_action 
 
-		add a0, s0, zero ; we push the input value of update_state
+		add a0, s0, zero ; parameter : the edgecapture
 		call update_state
 
 		call update_gsa
@@ -57,7 +57,7 @@ game_of_life:
 		add s1, zero, v0 ; we stock the return value of decrement_step in s1
 
 		call get_input
-		add s0, zero, v0
+		add s0, zero, v0 ; we update edgecapture
 		
 		br game_of_life_loop
 
@@ -643,13 +643,14 @@ game_of_life:
 	; BEGIN:update_state
 	update_state:
 		;making sure s's remain unchanged
-		addi sp, sp, -8
+		addi sp, sp, -4
 		stw s0, 0(sp)
+		addi sp, sp, -4
 		stw s1, 0(sp)
 		;making sure s's remain unchanged
 
 		ldw s0, CURR_STATE (zero) ; s0 = current state
-		addi s1, a0, 0 ; s1 is the edgecapture
+		addi s1, a0, 0 ; s1 = edgecapture
 			
 		update_state_case1:
 			; first we will check whether b1 is pressed and current_state != RUN
@@ -699,8 +700,9 @@ game_of_life:
 		update_state_end:
 			;making sure s's remain unchanged
 			ldw s1, 0(sp)
+			addi sp, sp, 4
 			ldw s0, 0(sp)
-			addi sp, sp, 8
+			addi sp, sp, 4
 			;making sure s's remain unchanged
 
 			ret ; once we are done we can exit the procedure
@@ -714,8 +716,9 @@ game_of_life:
 	; BEGIN:select_action
 	select_action:
 		;making sure s's remain unchanged
-		addi sp, sp, -8
+		addi sp, sp, -4
 		stw s0, 0(sp)
+		addi sp, sp, -4
 		stw s1, 0(sp)
 		;making sure s's remain unchanged
 
@@ -733,7 +736,7 @@ game_of_life:
 		select_action_init_rand:
 			s_a_i_r_b0:
 				andi t0, s1, 1 ; the state of b0
-				beq t0, zero, s_a_i_r_b1 ; if b0 isn't pressed we skip the next step
+				beq t0, zero, s_a_i_r_b1 ; if b0 isn't pressed we skip to the next step
 				call increment_seed ; we increment the seed
 
 			s_a_i_r_b1:
@@ -742,7 +745,7 @@ game_of_life:
 			s_a_i_r_b2:
 				srli t0, s1, 2 ; t0 LSB is the button 2 state
 				andi t0, t0, 1 ; we only keep the LSB of t0
-				beq t0, zero, s_a_i_r_b3 ; if b1 isn't pressed we skip the next step
+				beq t0, zero, s_a_i_r_b3 ; if b1 isn't pressed we skip to the next step
 
 				addi a0, zero, 0 ; parameter : b4 isn't pressed
 				addi a1, zero, 0 ; parameter : b3 isn't pressed
@@ -752,7 +755,7 @@ game_of_life:
 			s_a_i_r_b3:
 				srli t0, s1, 3 ; t0 LSB is the button 3 state
 				andi t0, t0, 1 ; we only keep the LSB of t0
-				beq t0, zero, s_a_i_r_b4 ; if b3 isn't pressed we skip the next step
+				beq t0, zero, s_a_i_r_b4 ; if b3 isn't pressed we skip to the next step
 
 				addi a0, zero, 0 ; parameter : b4 isn't pressed
 				addi a1, zero, 1 ; parameter : b3 is pressed
@@ -762,7 +765,7 @@ game_of_life:
 			s_a_i_r_b4:
 				srli t0, s1, 4 ; t0 LSB is the button 4 state
 				andi t0, t0, 1 ; we only keep the LSB of t0
-				beq t0, zero, s_a_i_r_end ; if b4 isn't pressed we skip the next step
+				beq t0, zero, s_a_i_r_end ; if b4 isn't pressed we skip to the end
 
 				addi a0, zero, 1 ; parameter : b4 is pressed
 				addi a1, zero, 0 ; parameter : b3 isn't pressed
@@ -774,15 +777,15 @@ game_of_life:
 
 		select_action_run:		
 			s_a_run_b0:
-				andi t0, s1, 1 ; the state of b0
-				beq t0, zero, s_a_run_b1 ; if b0 isn't pressed we skip the next step
+				andi t0, s1, 1 ; t0 is the state of b0
+				beq t0, zero, s_a_run_b1 ; if b0 isn't pressed we skip to the next step
 
 				call pause_game ; we change the playing state of our game
 
 			s_a_run_b1:
 				srli t0, s1, 1 ; t0 LSB is the button 1 state
 				andi t0, t0, 1 ; we only keep the LSB of t0
-				beq t0, zero, s_a_run_b2 ; if b1 isn't pressed we skip the next step
+				beq t0, zero, s_a_run_b2 ; if b1 isn't pressed we skip to the next step
 
 				addi a0, zero, 0 ; parameter : we must increase the speed
 				call change_speed ; we call change_speed we our parameter	
@@ -790,7 +793,7 @@ game_of_life:
 			s_a_run_b2:
 				srli t0, s1, 2 ; t0 LSB is the button 2 state
 				andi t0, t0, 1 ; we only keep the LSB of t0
-				beq t0, zero, s_a_run_b3 ; if b2 isn't pressed we skip the next step
+				beq t0, zero, s_a_run_b3 ; if b2 isn't pressed we skip to the next step
 
 				addi a0, zero, 1 ; parameter : we must decrease the speed
 				call change_speed ; we call change speed with our parameter
@@ -801,7 +804,7 @@ game_of_life:
 			s_a_run_b4:
 				srli t0, s1, 4 ; t0 LSB is the button 4 state
 				andi t0, t0, 1 ; we only keep the LSB of t0
-				beq t0, zero, s_a_run_end ; if b4 isn't pressed we skip the next step
+				beq t0, zero, s_a_run_end ; if b4 isn't pressed we skip to the end
 
 				call random_gsa ; we replace the current game gsa with a random one
 	
@@ -815,8 +818,9 @@ game_of_life:
 	
 			;making sure s's remain unchanged
 			ldw s1, 0(sp)
+			addi sp, sp, 4
 			ldw s0, 0(sp)
-			addi sp, sp, 8
+			addi sp, sp, 4
 			;making sure s's remain unchanged
 
 			ret ; once we are done we can exit the procedure
@@ -1031,9 +1035,11 @@ game_of_life:
 	; BEGIN:update_gsa
 	update_gsa:
 		;making sure s's remain unchanged
-		addi sp, sp, -12
+		addi sp, sp, -4
 		stw s5, 0(sp)
+		addi sp, sp, -4
 		stw s6, 0(sp)
+		addi sp, sp, -4
 		stw s7, 0(sp)
 		;making sure s's remain unchanged
 
@@ -1101,9 +1107,11 @@ game_of_life:
 
 			;making sure s's remain unchanged
 			ldw s7, 0(sp)
+			addi sp, sp, 4
 			ldw s6, 0(sp)
+			addi sp, sp, 4
 			ldw s5, 0(sp)
-			addi sp, sp, 12
+			addi sp, sp, 4
 			;making sure s's remain unchanged
 
 			ret ; once we are done we return		
@@ -1247,21 +1255,21 @@ game_of_life:
 			br get_input_end
 
 		get_input_b2:
-			srli t0, t0, 1 ; we shift so that the LSB is b1
+			srli t0, t0, 1 ; we shift so that the LSB is b2
 			and t2, t0, t1
 			beq t2, zero, get_input_b3 ; if the LSB isn't active we branch
 			addi v0, zero, 0b00100 ; return value : b2 is active
 			br get_input_end
 
 		get_input_b3:
-			srli t0, t0, 1 ; we shift so that the LSB is b1
+			srli t0, t0, 1 ; we shift so that the LSB is b3
 			and t2, t0, t1
 			beq t2, zero, get_input_b4 ; if the LSB isn't active we branch
 			addi v0, zero, 0b01000 ; return value : b3 is active
 			br get_input_end
 
 		get_input_b4:
-			srli t0, t0, 1 ; we shift so that the LSB is b1
+			srli t0, t0, 1 ; we shift so that the LSB is b4
 			and t2, t0, t1
 			beq t2, zero, get_input_no_button ; if the LSB isn't active we branch
 			addi v0, zero, 0b10000 ; return value : b4 is active
@@ -1353,9 +1361,11 @@ game_of_life:
 	; BEGIN:reset_game
 	reset_game:
 		;making sure s's remain unchanged
-		addi sp, sp, -12
+		addi sp, sp, -4
 		stw s5, 0(sp)
+		addi sp, sp, -4
 		stw s6, 0(sp)
+		addi sp, sp, -4
 		stw s7, 0(sp)
 		;making sure s's remain unchanged
 
@@ -1420,9 +1430,11 @@ game_of_life:
 
 		;making sure s's remain unchanged
 		ldw s7, 0(sp)
+		addi sp, sp, 4
 		ldw s6, 0(sp)
+		addi sp, sp, 4
 		ldw s5, 0(sp)
-		addi sp, sp, 12
+		addi sp, sp, 4
 		;making sure s's remain unchanged
 		
 		ret ; once we are done we return
