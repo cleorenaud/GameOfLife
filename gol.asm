@@ -798,7 +798,7 @@ game_of_life:
 				beq t0, zero, s_a_run_b2 ; if b1 isn't pressed we skip to the next step
 
 				addi a0, zero, 0 ; parameter : we must increase the speed
-				call change_speed ; we call change_speed we our parameter	
+				call change_speed ; we call change_speed we our parameter
 
 			s_a_run_b2:
 				srli t0, s1, 2 ; t0 LSB is the button 2 state
@@ -1042,6 +1042,7 @@ game_of_life:
 
 
 
+
 	; BEGIN:update_gsa
 	update_gsa:
 		;making sure s's remain unchanged
@@ -1083,14 +1084,11 @@ game_of_life:
 
 			update_gsa_x_loop_end:
 				; we must change the current gsa id 
-				ldw s1, GSA_ID (zero)
+				stw s1, GSA_ID (zero)
 				
-				addi a0, s5, 0 ; parameter: the line
+				addi a0, s5, 0 ; parameter: the GSA-line
 				addi a1, s7, 0 ; parameter: the y-coordinate 
 				call set_gsa
-
-				; and now we must revert it
-				ldw s0, GSA_ID (zero)
 
 			beq s7, zero, update_gsa_y_loop_end ; if the counter is zero we exit the loop
 			br update_gsa_y_loop ; else we countinue looping
@@ -1109,9 +1107,7 @@ game_of_life:
 			beq s6, zero, update_gsa_x_loop_end ; if the counter is 0 we exit the loop
 			br update_gsa_x_loop ; else we continue looping
 		
-		update_gsa_y_loop_end:
-			; we must change the current gsa id 
-			ldw s1, GSA_ID (zero)	
+		update_gsa_y_loop_end:	
 
 		update_gsa_end:
 			; we retrieve the current ra from the stack
@@ -1134,7 +1130,8 @@ game_of_life:
 			ret ; once we are done we return		
 	
 	; END:update_gsa
-
+		ret
+; END:update_gsa	
 
 
 
