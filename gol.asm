@@ -894,11 +894,36 @@ game_of_life:
 
 
 		add s7, zero, zero ;neighbours counter
-		add s0, zero, a0 ;x coordinate
-		add s1, zero, a1 ;y coordinate
-		addi s5, zero, N_GSA_LINES
 		addi s6, zero, N_GSA_COLUMNS
+		addi s5, zero, N_GSA_LINES
+		
 
+		add s0, zero, a0 ;x coordinate
+		;making sure it is in range [0, 11] i.e. do mod12
+		moding_12:
+		blt s0, zero, x_is_smaller ;x<0
+		blt s0, s6, x_is_ok ;x<12
+		x_is_bigger:
+			sub s0, s0, s6
+			jmpi moding_12
+		x_is_smaller:
+			add s0, s0, s6
+			jmpi moding_12
+
+		x_is_ok:
+		add s1, zero, a1 ;y coordinate
+		moding_8:
+		blt s1, zero, y_is_smaller ;y<0
+		blt s1, s5, y_is_ok ;y<8
+		y_is_bigger:
+			sub s1, s1, s5
+			jmpi moding_8
+
+		y_is_smaller:
+			add s1, s1, s5
+			jmpi moding_8
+
+		y_is_ok:
 		addi sp, sp, -4
 		stw ra, 0(sp)
 
@@ -1035,7 +1060,6 @@ game_of_life:
 		ret
 
 	; END:find_neighbours
-
 
 
 
