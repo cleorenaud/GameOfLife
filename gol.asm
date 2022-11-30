@@ -149,7 +149,7 @@ game_of_life:
 
 		wait_loop:
 			sub t1, t1, t2 ;substract speed
-			bltu t1, t0, wait_exit
+			blt t1, t0, wait_exit
 			br wait_loop
 		wait_exit:
         	ret
