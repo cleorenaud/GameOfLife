@@ -250,12 +250,15 @@ game_of_life:
 		addi s0, zero, 1 ; mask used to determine value at position x
 		add s1, zero, zero ;used to store value of x at given index
 		addi s3, zero, N_GSA_COLUMNS ;max value of x
+		addi s5, zero, N_GSA_LINES
 		add a0, zero, zero
 		add a1, zero, zero
-		addi s5, zero, N_GSA_LINES
+		add s6, zero, zero ;a0
+		add s7, zero, zero ;a1
 
 		y_loop:
 			add s2, zero, zero ;used to iterate over x's
+			add a0, s6, zero
 
 			addi sp, sp, -4
 			stw ra, 0(sp)
@@ -272,7 +275,7 @@ game_of_life:
 				bne s1, s0, check_if_finished
 
 				;setting_pixels
-				add a1, a0, zero ;we exchange x and y for set_pixel
+				add a1, s6, zero ;we exchange x and y for set_pixel
 				add a0, s2, zero ;we add value of x to a0
 
 				addi sp, sp, -4
@@ -281,15 +284,15 @@ game_of_life:
 				ldw ra, 0(sp)
 				addi sp, sp, 4
 				
-				add a0, a1, zero ; we re-exchange x and y
+				add a0, s6, zero ; we re-exchange x and y
 				add a1, zero, zero ;we exchange x and y for set_pixel
 
 			check_if_finished:
 				addi s2, s2, 1
 				bltu s2, s3, x_loop
 
-				addi a0, a0, 1
-				bltu a0, s5, y_loop ;we continue while a0 < 8
+				addi s6, s6, 1
+				bltu s6, s5, y_loop ;we continue while a0 < 8
 
 		;making sure s's remain unchanged
 		ldw s7, 0(sp)
