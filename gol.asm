@@ -981,6 +981,7 @@ game_of_life:
 		ldw ra, 0(sp)
 		addi sp, sp, 4 ;now v0 contains the value of the line
 		add s2, zero, v0
+		add s4, zero, zero ;used to determine whether we are at line neighbours or not, here NO
 		ret
 
 		line_neighbours:
@@ -992,6 +993,7 @@ game_of_life:
 		ldw ra, 0(sp)
 		addi sp, sp, 4 ;now v0 contains the value of the line
 		add s2, zero, v0
+		addi s4, zero, 1 ;used to determine whether we are at line neighbours or not, here YES
 		ret
 
 		under_neighbours:
@@ -1011,6 +1013,7 @@ game_of_life:
 		ldw ra, 0(sp)
 		addi sp, sp, 4 ;now v0 contains the value of the line
 		add s2, zero, v0
+		add s4, zero, zero ;used to determine whether we are at line neighbours or not, here NO
 		ret
 
 
@@ -1039,16 +1042,17 @@ game_of_life:
 		;we apply masks
 		mask_minus_one:
 			addi t0, zero, 1
-			and s4, t0, s2
-			add s7, s7, s4
+			and t4, t0, s2
+			add s7, s7, t4
 
 		mask_zero:
 			addi t0, zero, 2
-			beq s1, a0, state_of_cell
+			addi t1, zero, 1
+			beq s4, t1, state_of_cell
 			;if not, we are either at y-1 or y+1
-			and s4, t0, s2
-			srli s4, s4, 1
-			add s7, s7, s4
+			and t4, t0, s2
+			srli t4, t4, 1
+			add s7, s7, t4
 			jmpi mask_plus_one
 
 			state_of_cell:
@@ -1057,15 +1061,13 @@ game_of_life:
 
 		mask_plus_one:
 			addi t0, zero, 4
-			and s4, t0, s2
-			srli s4, s4, 2
-			add s7, s7, s4
+			and t4, t0, s2
+			srli t4, t4, 2
+			add s7, s7, t4
 		
 		ret
 
 	; END:find_neighbours
-
-
 
 
 
