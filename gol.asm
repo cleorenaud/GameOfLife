@@ -1,6 +1,6 @@
     ;;    game state memory location
     .equ CURR_STATE, 0x1000              ; current game state
-    .eqIDu GSA_, 0x1004                  ; gsa currently in use for drawing
+    .equ GSA_ID, 0x1004                  ; gsa currently in use for drawing
     .equ PAUSE, 0x1008                   ; is the game paused or running
     .equ SPEED, 0x100C                   ; game speed
     .equ CURR_STEP,  0x1010              ; game current step
