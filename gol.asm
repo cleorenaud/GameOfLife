@@ -941,6 +941,7 @@ game_of_life:
 		addi sp, sp, 4
 
 		add v0, zero, s7
+		add v1, zero, s3
 
 
 		;making sure s's remain unchanged
@@ -1016,19 +1017,19 @@ game_of_life:
 		computing_neighbours:
 		bne s0, zero, not_most_right
 		addi t0, s6, -1
-		srl s3, s2, t0
+		srl t3, s2, t0
 		slli s2, s2, 1
-		or s2, s2, s3
+		or s2, s2, t3
 		jmpi mask_minus_one ;is already in second to last position
 		not_most_right:
 
 		addi t0, s6, -1
 		bne s0, t0, not_most_left
 		addi t0, t0, -1
-		srl s3, s2, t0
+		srl t3, s2, t0
 		andi t1, s2, 1
 		slli t1, t1, 2
-		or s2, s3, t1
+		or s2, t3, t1
 		jmpi mask_minus_one
 		not_most_left:
 		
@@ -1051,8 +1052,8 @@ game_of_life:
 			jmpi mask_plus_one
 
 			state_of_cell:
-				and v1, t0, s2
-				srli v1, v1, 1
+				and s3, t0, s2
+				srli s3, s3, 1
 
 		mask_plus_one:
 			addi t0, zero, 4
@@ -1063,7 +1064,6 @@ game_of_life:
 		ret
 
 	; END:find_neighbours
-
 
 
 
